@@ -1,0 +1,40 @@
+# -------------------
+# Android Ignores
+# built application files
+*.apk
+*.ap_
+
+# files for the dex VM
+*.dex
+# Java class files
+*.class
+# generated files
+bin/
+gen/
+doc/
+# Local configuration file (sdk path, etc)
+local.properties
+# Elcipse Ignores
+*.pydevproject
+.metadata
+.project
+project.properties
+bin/**
+tmp/**
+tmp/**/*
+*.tmp
+*.bak
+*.swp
+*~.nib
+.settings/
+.loadpath
+.classpath
+# External tool builders
+.externalToolBuilders/
+# Locally stored "Eclipse launch configurations"
+*.launch
+# CDT-specific
+.cproject
+# PDT-specific
+.buildpath
+/docs/
