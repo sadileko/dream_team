@@ -513,8 +513,7 @@ public class FirstActivity extends Activity {
 				
 				// Check for other interesting types, if needed...
 			} else
-				Log.i(TAG,
-						"Event does NOT contain native IContextInfo... we need to rely on the string representation!");
+				Log.i(TAG,"Event does NOT contain native IContextInfo... we need to rely on the string representation!");
 
 		}
 
