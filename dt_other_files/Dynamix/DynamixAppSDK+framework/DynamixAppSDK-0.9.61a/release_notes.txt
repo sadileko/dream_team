@@ -1,5 +1,0 @@
-Dynamix Open App SDK Release Notes
-Version: 0.9.61a
-Date:    November 14, 2013
----
-To get started writing native Dynamix apps, import the example project contained within the SimpleLogger example file. Use this project as a template for your own apps. Remember that you MUST include the 'org.ambientdynamix.application.api_v0.9.61.jar' file on your app's build path, and it must be exported with your app. 
