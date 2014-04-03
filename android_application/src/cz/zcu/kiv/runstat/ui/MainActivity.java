@@ -1,9 +1,9 @@
-package kiv.zcu.P.runstat;
+package cz.zcu.kiv.runstat.ui;
 
 import org.ambientdynamix.api.application.IDynamixFacade;
 
-import kiv.zcu.L.runstat.DynamixPlugin;
-import kiv.zcu.runstat.R;
+import cz.zcu.kiv.runstat.R;
+import cz.zcu.kiv.runstat.data.DynamixPlugin;
 import android.os.Bundle;
 import android.os.Handler;
 import android.app.Activity;

@@ -1,4 +1,4 @@
-package kiv.zcu.L.runstat;
+package cz.zcu.kiv.runstat.data;
 
 import java.util.List;
 
