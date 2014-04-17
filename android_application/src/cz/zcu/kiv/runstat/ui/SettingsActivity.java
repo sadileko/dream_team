@@ -26,44 +26,32 @@
 package cz.zcu.kiv.runstat.ui;
 
 import cz.zcu.kiv.runstat.R;
-import cz.zcu.kiv.runstat.data.*;
-import android.os.Bundle;
-import android.os.Handler;
 import android.app.Activity;
-import android.app.ActivityManager;
-import android.app.ActivityManager.RunningServiceInfo;
-import android.content.BroadcastReceiver;
-import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
-import android.util.Log;
+import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
-import android.widget.EditText;
-import android.widget.TextView;
 
-public class MainActivity extends Activity{
-
-	private final String TAG = this.getClass().getSimpleName();
+public class SettingsActivity extends Activity {
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.activity_main);
-		Log.i(TAG, "onCreate()");
+		setContentView(R.layout.activity_settings);
 		
-		final Button btnStart = (Button) findViewById(R.id.btnStart);
-		btnStart.setOnClickListener(new OnClickListener() {
-				@Override
-				public void onClick(View v) {
-					Log.i(TAG, "Start");
-					Intent intent = new Intent(MainActivity.this, BasicrunActivity.class); 
-					startActivity(intent);										
-				}
+		
+		final Button btnBack = (Button) findViewById(R.id.btnBack);
+		btnBack.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				Intent intent = new Intent(SettingsActivity.this, MainActivity.class); 
+				startActivity(intent);
+			}
 		});
+		
 	}
 	
 	
@@ -80,21 +68,19 @@ public class MainActivity extends Activity{
 		return true;
 	}	
 	
-	
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 	    // Handle item selection
 	    switch (item.getItemId()) {
 	    case R.id.action_settings:
-	    	Intent intent = new Intent(this, SettingsActivity.class); 
-			startActivity(intent);
+	    	//*
 	        return true;
 	    case R.id.action_help:
-	        // showHelp();
+	    	Intent intent1 = new Intent(this, MainActivity.class); 
+	    	startActivity(intent1);
 	        return true;
 	    default:
 	        return super.onOptionsItemSelected(item);
 	    }
 	}
-	
 }

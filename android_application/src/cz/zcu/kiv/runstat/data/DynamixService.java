@@ -1,3 +1,28 @@
+/***********************************************************************************************************************
+ *
+ * This file is part of the ${PROJECT_NAME} project
+
+ * ==========================================
+ *
+ * Copyright (C) ${YEAR} by University of West Bohemia (http://www.zcu.cz/en/)
+ *
+ ***********************************************************************************************************************
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
+ * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations under the License.
+ *
+ ***********************************************************************************************************************
+ *
+ * ${NAME}, ${YEAR}/${MONTH}/${DAY} ${HOUR}:${MINUTE} ${USER}
+ *
+ **********************************************************************************************************************/
+
 package cz.zcu.kiv.runstat.data;
 
 import java.util.List;
@@ -14,11 +39,23 @@ import org.ambientdynamix.api.application.Result;
 import org.ambientdynamix.contextplugins.location.ILocationContextInfo;
 import org.ambientdynamix.contextplugins.pedometer.IPedometerStepInfo;
 
+import cz.zcu.kiv.runstat.ui.BasicrunActivity.RServiceRequestReceiver;
+import android.app.Service;
+import android.content.ComponentName;
+import android.content.Context;
+import android.content.Intent;
+import android.content.ServiceConnection;
 import android.os.IBinder;
 import android.os.RemoteException;
-import android.content.ComponentName;
-import android.content.ServiceConnection;
 import android.util.Log;
+
+public class DynamixService extends Service
+{
+// Classname for logging purposes
+private final String TAG = this.getClass().getSimpleName();
+
+private DynamixPlugin dx = null;
+
 
 public class DynamixPlugin {
 
@@ -32,8 +69,7 @@ public class DynamixPlugin {
 	public double stepForce;
 	public double latitude;
 	public double longtitude;
-	public String log;
-	public String cache;
+	
 	
 	public DynamixPlugin(){
 		
@@ -41,34 +77,27 @@ public class DynamixPlugin {
 		this.stepForce = 0.0;
 		this.latitude = 0.0;
 		this.longtitude = 0.0;
-		this.log = "";
-		this.cache = "";
 		
 		if (dynamix == null) {
 			Log.i(TAG, "Connecting to Dynamix...");
-			log = "Connecting to Dynamix...";
 			
 		} else {
 			try {
 				if (!dynamix.isSessionOpen()) {
 					Log.i(TAG, "Dynamix connected... trying to open session");
-					log = "Dynamix connected... trying to open session";
 					
 					dynamix.openSession();
 				} else
 				{
 					Log.i(TAG, "Session is already open");
-					log = "Session is already open";
 				}
 			} catch (RemoteException e) {
 				Log.e(TAG, e.toString());
-				log = e.toString();
 			}
 		}
 		
 	}
-		
-		
+    
 	public ServiceConnection sConnection = new ServiceConnection() {
 		/*
 		 * Indicates that we've successfully connected to Dynamix. During this call, we transform the incoming IBinder
@@ -79,7 +108,6 @@ public class DynamixPlugin {
 			// Add ourselves as a Dynamix listener
 			try {
 				Log.i(TAG, "Dynamix is connected!");
-				log = "Dynamix is connected!";
 				
 				// Create a Dynamix Facade using the incoming IBinder
 				dynamix = IDynamixFacade.Stub.asInterface(service);
@@ -98,8 +126,7 @@ public class DynamixPlugin {
 		@Override
 		public void onServiceDisconnected(ComponentName name) {
 			Log.i(TAG, "Dynamix is disconnected!");
-			log = "Dynamix is disconnected!";
-			
+		
 			dynamix = null;
 		}
 	};
@@ -118,7 +145,6 @@ public class DynamixPlugin {
 			} else
 			{
 				Log.i(TAG, "dynamix already connected");
-				log = "dynamix already connected";
 			}
 		}
 
@@ -136,7 +162,7 @@ public class DynamixPlugin {
 		@Override
 		public void onSessionClosed() throws RemoteException {
 			Log.i(TAG, "onSessionClosed");
-			log = "onSessionClosed";
+
 		}
 
 		@Override
@@ -215,7 +241,6 @@ public class DynamixPlugin {
 			 * Log some information about the incoming event
 			 */			
 			Log.i(TAG, "onContextEvent received from plugin: " + event.getEventSource());
-			log = "onContextEvent received from plugin: " + event.getEventSource();
 			
 			Log.i(TAG, "-------------------");
 			Log.i(TAG, "Event context type: " + event.getContextType());
@@ -250,23 +275,26 @@ public class DynamixPlugin {
 				if (nativeInfo instanceof IPedometerStepInfo) {
 					IPedometerStepInfo stepInfo = (IPedometerStepInfo) nativeInfo;
 					Log.i(TAG, "Received IPedometerStepInfo with RmsStepForce: " + stepInfo.getRmsStepForce());
-					log = "Received IPedometerStepInfo with RmsStepForce: " + stepInfo.getRmsStepForce();
 					
 					stepForce = stepInfo.getRmsStepForce();
 					
 					if(stepForce>=1.0)
-						steps++;					
+						steps++;		
 					
+					Log.d(TAG, "Kroky:" + steps);
+					
+					broadcast();
 				}
 				
 				// Example of using Location
 				if (nativeInfo instanceof ILocationContextInfo) {
 			          ILocationContextInfo data = (ILocationContextInfo) nativeInfo;
 			          Log.i(TAG, "Received ILocationContextInfo with location: " + data.getLatitude() + ":" + data.getLongitude());
-			         log = "Received ILocationContextInfo with location: " + data.getLatitude() + ":" + data.getLongitude();
 			          
 			     latitude = data.getLatitude();
 			     longtitude = data.getLongitude();
+			     
+			     broadcast();
 				}
 				
 				// Check for other interesting types, if needed...
@@ -342,5 +370,71 @@ public class DynamixPlugin {
 		}
 	}
 
+	private void broadcast(){
 		
+		Intent broadcastIntent = new Intent();
+        broadcastIntent.setAction(RServiceRequestReceiver.PROCESS_RESPONSE);
+        broadcastIntent.addCategory(Intent.CATEGORY_DEFAULT);
+        
+        broadcastIntent.putExtra("DxSteps", dx.steps);
+        broadcastIntent.putExtra("DxLat", dx.latitude);
+        broadcastIntent.putExtra("DxLng", dx.longtitude);
+        
+        sendBroadcast(broadcastIntent);
+	}
+		
+}
+
+
+@Override
+public IBinder onBind(Intent arg0)
+{
+    return null;
+}
+
+@Override
+public int onStartCommand(Intent intent, int flags, int startId)
+{
+    Log.e(TAG, "onStartCommand");
+    super.onStartCommand(intent, flags, startId);       
+    return START_NOT_STICKY;
+}
+
+@Override
+public void onCreate()
+{
+    Log.e(TAG, "onCreate");
+    
+    dx = new DynamixPlugin();
+    
+    try {
+    	bindService(new Intent(IDynamixFacade.class.getName()), dx.sConnection, Context.BIND_AUTO_CREATE);
+
+    } catch (java.lang.SecurityException ex) {
+        Log.i(TAG, "Error while binding Dynamix");
+    }
+}
+
+@Override
+public void onDestroy()
+{
+    super.onDestroy();
+    Log.e(TAG, "onDestroy");
+    
+    try {
+    	
+    	dx.dynamix.removeAllContextSupport();
+		dx.dynamix.closeSession();
+		dx.steps = 0;
+		dx.longtitude = 0;
+		dx.latitude = 0;
+		unbindService(dx.sConnection);
+		dx = null;
+		stopSelf();
+		
+	} catch (RemoteException e) {
+		e.printStackTrace();
+	}
+} 
+
 }
