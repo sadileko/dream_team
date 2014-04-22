@@ -90,7 +90,8 @@ public class MainActivity extends Activity{
 			startActivity(intent);
 	        return true;
 	    case R.id.action_help:
-	        // showHelp();
+	    	Intent intent2 = new Intent(this, HelpActivity.class); 
+			startActivity(intent2);
 	        return true;
 	    default:
 	        return super.onOptionsItemSelected(item);

@@ -42,9 +42,12 @@ import org.ambientdynamix.contextplugins.pedometer.IPedometerStepInfo;
 import cz.zcu.kiv.runstat.ui.BasicrunActivity.RServiceRequestReceiver;
 import android.app.Service;
 import android.content.ComponentName;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.database.sqlite.SQLiteDatabase;
+import android.location.Location;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Log;
@@ -64,12 +67,20 @@ public class DynamixPlugin {
 		
 	public IDynamixFacade dynamix;
 		
+	private DBHelper db = new DBHelper(getApplicationContext());
+	
 	//Variables
 	public int steps;
 	public double stepForce;
 	public double latitude;
 	public double longtitude;
+	public float speed;
+	public float distance;
 	
+	private double prevLat;
+	private double prevLng;
+	
+	private String provider;
 	
 	public DynamixPlugin(){
 		
@@ -77,6 +88,11 @@ public class DynamixPlugin {
 		this.stepForce = 0.0;
 		this.latitude = 0.0;
 		this.longtitude = 0.0;
+		this.speed = 0;
+		this.distance = 0;
+		this.prevLat = 0.0;
+		this.prevLng = 0.0;
+		this.provider = "";
 		
 		if (dynamix == null) {
 			Log.i(TAG, "Connecting to Dynamix...");
@@ -290,9 +306,33 @@ public class DynamixPlugin {
 				if (nativeInfo instanceof ILocationContextInfo) {
 			          ILocationContextInfo data = (ILocationContextInfo) nativeInfo;
 			          Log.i(TAG, "Received ILocationContextInfo with location: " + data.getLatitude() + ":" + data.getLongitude());
-			          
+			         
+			     prevLat = latitude;
+			     prevLng = longtitude;
+			     
 			     latitude = data.getLatitude();
 			     longtitude = data.getLongitude();
+			     speed = data.getSpeed();
+			     
+			     if(prevLat!=0.0 && prevLng!=0.0){
+			    	 Location prevLocation = new Location("");
+			    	 prevLocation.setLatitude(prevLat);
+			    	 prevLocation.setLongitude(prevLng);
+			    	 Location myLocation = new Location("");
+			    	 myLocation.setLatitude(latitude);
+			    	 myLocation.setLongitude(longtitude);
+			    	 distance += prevLocation.distanceTo(myLocation);
+			    	 
+			     }else{
+			    	 distance = 0;
+			     }
+			     
+			     provider = data.getProvider();	  
+			     
+			     Log.d(TAG, "Provider: "+provider);
+			     Log.d(TAG, "Speed: " + Float.toString(speed));
+			     
+			     db.addToDatabase(Double.toString(latitude), Double.toString(longtitude), steps, Float.toString(speed),Float.toString(distance));
 			     
 			     broadcast();
 				}
@@ -379,6 +419,9 @@ public class DynamixPlugin {
         broadcastIntent.putExtra("DxSteps", dx.steps);
         broadcastIntent.putExtra("DxLat", dx.latitude);
         broadcastIntent.putExtra("DxLng", dx.longtitude);
+        broadcastIntent.putExtra("DxSpeed", dx.speed);
+        broadcastIntent.putExtra("DxDistance", dx.distance);
+        broadcastIntent.putExtra("DxProvider", dx.provider);
         
         sendBroadcast(broadcastIntent);
 	}

@@ -26,5 +26,8 @@
     <string name="strTimeRun">TIME RUNNING</string>
     <string name="strSeedUnit">Km/h</string>
     <string name="strDistanceDone">0 m</string>
+    <string name="strHelpText">Lorem ipsum</string>
+    <string name="strLocated">Located</string>
+    <string name="strProvider">Provider:</string>
 
 </resources>

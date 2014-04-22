@@ -25,17 +25,22 @@
 
 package cz.zcu.kiv.runstat.ui;
 
+import java.util.List;
+
 import cz.zcu.kiv.runstat.R;
+import cz.zcu.kiv.runstat.data.DBHelper;
 import cz.zcu.kiv.runstat.data.DynamixService;
 import cz.zcu.kiv.runstat.data.Helper;
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.ActivityManager.RunningServiceInfo;
+import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.SharedPreferences;
+import android.graphics.Typeface;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
@@ -43,8 +48,11 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.View.OnLongClickListener;
 import android.view.WindowManager;
 import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.ImageButton;
 import android.widget.TextView;
 
 public class BasicrunActivity extends Activity {
@@ -57,20 +65,22 @@ public class BasicrunActivity extends Activity {
 		
 		//BroadcastReciever instance
 		private RServiceRequestReceiver receiver;
-			
-		private SharedPreferences mPrefs;
-
 		 
 		public int steps = 0;
 		public double stepForce = 0.0;
 		public double latitude = 0.0;
 		public double longtitude = 0.0;
+		public float speed = 0;
+		public float distance = 0;
+		public String provider = "";
 		
 		//Widgets
 		private Handler myHandler;
-		private TextView txtLat;
-		private TextView txtLng;
 		private TextView txtSteps;	
+		private TextView txtCurrentSpeed;
+		private TextView txtDistance;
+		private CheckBox chckLocated;
+		private TextView  txtProvider;
 		
 		@Override
 		protected void onCreate(Bundle savedInstanceState) {
@@ -79,13 +89,20 @@ public class BasicrunActivity extends Activity {
 
 			Log.d(TAG,"onCreate()");
 			
+			final DBHelper db = new DBHelper(getApplicationContext());
+			
 			//Refreshing UI
 			myHandler = new Handler();
 			myHandler.post(stepsUpdate);
 			
-			txtLat = (TextView) findViewById(R.id.txtLat);
-			txtLng = (TextView) findViewById(R.id.txtLng);
 			txtSteps = (TextView) findViewById(R.id.txtSteps);
+			
+			txtCurrentSpeed = (TextView) findViewById(R.id.txtCurrentSpeed);
+			
+			txtDistance = (TextView) findViewById(R.id.txtDistance);
+			txtProvider = (TextView) findViewById(R.id.txtProvider);
+			
+			chckLocated = (CheckBox) findViewById(R.id.chckLocated);
 			
 			getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON); 		
 							
@@ -96,15 +113,75 @@ public class BasicrunActivity extends Activity {
 	        
 	        startRService();
 	        
+	        
+	        
+	        final AlertDialog.Builder builder = new AlertDialog.Builder(this);
+	    	builder
+	    	.setTitle("Exit running")
+	    	.setMessage("Are you sure?")
+	    	.setIcon(android.R.drawable.ic_dialog_alert)
+	    	.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+	    	    public void onClick(DialogInterface dialog, int which) {			      	
+	    	    	stopRService();
+					Intent intent = new Intent(BasicrunActivity.this, MainActivity.class); 
+					startActivity(intent);	    	    	
+	    	    }
+	    	})
+	    	.setNegativeButton("No", null);	
+	    	
+	    	
 			//********Buttons**********				
 			final Button btnEnd = (Button) findViewById(R.id.btnEnd);
 			btnEnd.setOnClickListener(new OnClickListener() {
 					@Override
 					public void onClick(View v) {
-						Intent intent = new Intent(BasicrunActivity.this, MainActivity.class); 
+							builder.show();									
+					}
+			});
+			
+			final ImageButton btnHelp = (ImageButton) findViewById(R.id.btnHelp);
+			btnHelp.setOnClickListener(new OnClickListener() {
+					@Override
+					public void onClick(View v) {
+						stopRService();
+						Intent intent = new Intent(BasicrunActivity.this, HelpActivity.class); 
 						startActivity(intent);										
 					}
 			});
+			
+			final Button button1 = (Button) findViewById(R.id.button1);
+			button1.setOnClickListener(new OnClickListener() {
+					@Override
+					public void onClick(View v) {
+						List<String> locations = db.getAllLocations();      
+				         
+				        for (int i =0; i<locations.size();i++) {
+				            String log = "From DB:" + locations.get(i);
+				            Log.d("TAG ", log);										
+				        }
+					}
+			});
+			
+			final Button button2 = (Button) findViewById(R.id.button2);
+			button2.setOnClickListener(new OnClickListener() {
+					@Override
+					public void onClick(View v) {
+						db.removeAllLocations();
+					}
+			});
+			
+			txtCurrentSpeed.setOnLongClickListener(new OnLongClickListener() { 
+		        @Override
+		        public boolean onLongClick(View v){    
+		        
+		        	Intent intent = hlp.showLocation(latitude, longtitude); 
+					startActivity(intent);
+					
+		            return true;
+		        }
+		    });
+								
+	    	
 		}
 		
 		public void startRService(){
@@ -141,6 +218,7 @@ public class BasicrunActivity extends Activity {
 		public void onDestroy(){
 			super.onDestroy();
 			
+			stopRService();
 		}
 		
 		@Override
@@ -159,7 +237,8 @@ public class BasicrunActivity extends Activity {
 				startActivity(intent);
 		        return true;
 		    case R.id.action_help:
-		        // showHelp();
+		    	Intent intent2 = new Intent(this, HelpActivity.class); 
+				startActivity(intent2);
 		        return true;
 		    default:
 		        return super.onOptionsItemSelected(item);
@@ -171,10 +250,13 @@ public class BasicrunActivity extends Activity {
 		private Runnable stepsUpdate = new Runnable() {
 			   public void run() {
 				   
-				   txtLat.setText(Double.toString(latitude));
-				   txtLng.setText(Double.toString(longtitude));
-				   
-			       txtSteps.setText("" + steps);
+			       txtSteps.setText("(Aprox. " + steps + " steps)");
+			       
+			       txtCurrentSpeed.setText("" + speed);
+			       
+			       txtDistance.setText(""+ distance +" m");
+			       
+			       txtProvider.setText("Provider: " + provider);
 			       
 			       myHandler.postDelayed(this, 250);
 			    }
@@ -190,7 +272,12 @@ public class BasicrunActivity extends Activity {
 	            steps = intent.getIntExtra("DxSteps", 0);
 	            latitude = intent.getDoubleExtra("DxLat", 0.0);
 	            longtitude = intent.getDoubleExtra("DxLng", 0.0);
-
+	            speed = intent.getFloatExtra("DxSpeed", 0);
+	            distance = intent.getFloatExtra("DxDistance", 0);
+	            provider = intent.getStringExtra("DxProvider").toUpperCase();
+	            
+	            if(latitude!=0.0)
+	            	chckLocated.setChecked(true);
 	        }
 		}
 	
