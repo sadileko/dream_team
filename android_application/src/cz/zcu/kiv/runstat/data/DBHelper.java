@@ -71,11 +71,13 @@ public class DBHelper extends SQLiteOpenHelper {
 	public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
 		Log.i(TAG,"onUpgrade()-old: "+oldVersion+"new: "+newVersion);
 		
-        // TODO Auto-generated method stub
         db.execSQL("DROP TABLE IF EXISTS " + TABLE);
         onCreate(db);
 	}
 	
+	/*
+	 * Adds location to DB
+	 */
 	public void addToDatabase(String lat, String lng, int steps, String speed, String distance) {
 		SQLiteDatabase db = this.getWritableDatabase();
 		ContentValues values = new ContentValues();
@@ -93,6 +95,9 @@ public class DBHelper extends SQLiteOpenHelper {
 		Log.d(TAG, "add data: "+lat+":"+lng);
 	}
 	
+	/*
+	 * Returns all locations from DB as list
+	 */
 	public List<String> getAllLocations() {
         List<String> locationList = new ArrayList<String>();
         // Select All Query
@@ -117,6 +122,9 @@ public class DBHelper extends SQLiteOpenHelper {
         return locationList;
     }
 	
+	/*
+	 * Removes all locations in DB
+	 */
 	public void removeAllLocations(){
 		SQLiteDatabase db = this.getWritableDatabase(); // helper is object extends SQLiteOpenHelper
 	    db.delete(TABLE, null, null);

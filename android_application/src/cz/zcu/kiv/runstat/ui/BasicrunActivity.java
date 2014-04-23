@@ -74,7 +74,7 @@ public class BasicrunActivity extends Activity {
 		public float distance = 0;
 		public String provider = "";
 		
-		//Widgets
+		//View
 		private Handler myHandler;
 		private TextView txtSteps;	
 		private TextView txtCurrentSpeed;
@@ -91,10 +91,11 @@ public class BasicrunActivity extends Activity {
 			
 			final DBHelper db = new DBHelper(getApplicationContext());
 			
-			//Refreshing UI
+			//Handler for refreshing UI
 			myHandler = new Handler();
 			myHandler.post(stepsUpdate);
 			
+			//Inicialize widgets
 			txtSteps = (TextView) findViewById(R.id.txtSteps);
 			
 			txtCurrentSpeed = (TextView) findViewById(R.id.txtCurrentSpeed);
@@ -104,8 +105,10 @@ public class BasicrunActivity extends Activity {
 			
 			chckLocated = (CheckBox) findViewById(R.id.chckLocated);
 			
+			// Keep screen on
 			getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON); 		
-							
+					
+			//Intent filter for broadcast receiver
 			IntentFilter filter = new IntentFilter(RServiceRequestReceiver.PROCESS_RESPONSE);
 	        filter.addCategory(Intent.CATEGORY_DEFAULT);
 			receiver = new RServiceRequestReceiver();
@@ -113,8 +116,7 @@ public class BasicrunActivity extends Activity {
 	        
 	        startRService();
 	        
-	        
-	        
+	        //Message box
 	        final AlertDialog.Builder builder = new AlertDialog.Builder(this);
 	    	builder
 	    	.setTitle("Exit running")
@@ -184,12 +186,18 @@ public class BasicrunActivity extends Activity {
 	    	
 		}
 		
+		/*
+		 * Start service
+		 */
 		public void startRService(){
 			Log.d(TAG, "startRService()");
 			Intent intent = new Intent(BasicrunActivity.this, DynamixService.class); 
 			startService(intent); 		
 		}
 
+		/*
+		 * Stops running serbvice
+		 */
 		public void stopRService()
 		{
 			Log.d(TAG, "stopRService()");
@@ -197,7 +205,9 @@ public class BasicrunActivity extends Activity {
 			stopService(intent);
 		}
 		
-		
+		/*
+		 * Checks wheter the service is running
+		 */
 		public boolean serviceRunning()
 		{
 			Log.d(TAG, "serviceRunning()");
@@ -228,6 +238,10 @@ public class BasicrunActivity extends Activity {
 			return true;
 		}	
 		
+		/*
+		 * (non-Javadoc)
+		 * @see android.app.Activity#onOptionsItemSelected(android.view.MenuItem)
+		 */
 		@Override
 		public boolean onOptionsItemSelected(MenuItem item) {
 		    // Handle item selection
@@ -245,14 +259,17 @@ public class BasicrunActivity extends Activity {
 		    }
 		}
 		
-		
-		//Refreshing View
+		/*
+		 * Refreshing UI
+		 */
 		private Runnable stepsUpdate = new Runnable() {
 			   public void run() {
-				   
+
 			       txtSteps.setText("(Aprox. " + steps + " steps)");
 			       
-			       txtCurrentSpeed.setText("" + speed);
+			       //convert meters to km per hours and round the value
+			       float roundedSpeed= (float)Math.round(speed * 36) / 10;
+			       txtCurrentSpeed.setText("" + roundedSpeed);
 			       
 			       txtDistance.setText(""+ distance +" m");
 			       
@@ -262,7 +279,9 @@ public class BasicrunActivity extends Activity {
 			    }
 		};
 
-		
+		/*
+		 * Broadcast receiver for receiving values from service
+		 */
 		public class RServiceRequestReceiver extends BroadcastReceiver{
 			 
 	        public static final String PROCESS_RESPONSE = "cz.zcu.kiv.runstat.intent.action.PROCESS_RESPONSE";

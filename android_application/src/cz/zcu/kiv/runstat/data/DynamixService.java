@@ -67,6 +67,7 @@ public class DynamixPlugin {
 		
 	public IDynamixFacade dynamix;
 		
+	//DBHelper instance used for savind data to DB
 	private DBHelper db = new DBHelper(getApplicationContext());
 	
 	//Variables
@@ -82,6 +83,9 @@ public class DynamixPlugin {
 	
 	private String provider;
 	
+	/*
+	 * Constructor
+	 */
 	public DynamixPlugin(){
 		
 		this.steps = 0;
@@ -306,7 +310,8 @@ public class DynamixPlugin {
 				if (nativeInfo instanceof ILocationContextInfo) {
 			          ILocationContextInfo data = (ILocationContextInfo) nativeInfo;
 			          Log.i(TAG, "Received ILocationContextInfo with location: " + data.getLatitude() + ":" + data.getLongitude());
-			         
+			     
+			     //Save location for calculating distance
 			     prevLat = latitude;
 			     prevLng = longtitude;
 			     
@@ -314,6 +319,7 @@ public class DynamixPlugin {
 			     longtitude = data.getLongitude();
 			     speed = data.getSpeed();
 			     
+			     //Calculate distance between two locations
 			     if(prevLat!=0.0 && prevLng!=0.0){
 			    	 Location prevLocation = new Location("");
 			    	 prevLocation.setLatitude(prevLat);
@@ -332,12 +338,13 @@ public class DynamixPlugin {
 			     Log.d(TAG, "Provider: "+provider);
 			     Log.d(TAG, "Speed: " + Float.toString(speed));
 			     
+			     //Save location to DB
 			     db.addToDatabase(Double.toString(latitude), Double.toString(longtitude), steps, Float.toString(speed),Float.toString(distance));
 			     
+			     //Send data to UI
 			     broadcast();
 				}
-				
-				// Check for other interesting types, if needed...
+
 			} else
 				Log.i(TAG,"Event does NOT contain native IContextInfo... we need to rely on the string representation!");
 
@@ -410,6 +417,9 @@ public class DynamixPlugin {
 		}
 	}
 
+	/*
+	 * Sends broadcast to Activity
+	 */
 	private void broadcast(){
 		
 		Intent broadcastIntent = new Intent();

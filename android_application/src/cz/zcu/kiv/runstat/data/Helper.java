@@ -30,7 +30,9 @@ import android.net.Uri;
 
 public class Helper {
 
-	//Prepares intent with coordinates for google maps
+	/*
+	 * Prepares intent with coordinates for google maps
+	 */
 	public Intent showLocation(double lat, double lng){
 		
 		if(lat != 0.0){
