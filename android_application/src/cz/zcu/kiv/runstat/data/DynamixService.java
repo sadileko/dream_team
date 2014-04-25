@@ -260,23 +260,7 @@ public class DynamixPlugin {
 			/*
 			 * Log some information about the incoming event
 			 */			
-			Log.i(TAG, "onContextEvent received from plugin: " + event.getEventSource());
 			
-			Log.i(TAG, "-------------------");
-			Log.i(TAG, "Event context type: " + event.getContextType());
-			Log.i(TAG, "Event timestamp " + event.getTimeStamp().toLocaleString());
-			if (event.expires())
-				Log.i(TAG, "Event expires at " + event.getExpireTime().toLocaleString());
-			else
-				Log.i(TAG, "Event does not expire");
-			/*
-			 * To illustrate how string-based context representations are accessed, we log each contained in the event.
-			 */
-			for (String format : event.getStringRepresentationFormats()) {
-				Log.i(TAG,
-						"Event string-based format: " + format + " contained data: "
-								+ event.getStringRepresentation(format));
-			}
 			// Check for native IContextInfo
 			if (event.hasIContextInfo()) {
 				Log.i(TAG, "Event contains native IContextInfo: " + event.getIContextInfo());

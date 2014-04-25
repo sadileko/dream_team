@@ -27,6 +27,7 @@ package cz.zcu.kiv.runstat.ui;
 
 import cz.zcu.kiv.runstat.R;
 import cz.zcu.kiv.runstat.data.*;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.app.Activity;
@@ -61,7 +62,19 @@ public class MainActivity extends Activity{
 				public void onClick(View v) {
 					Log.i(TAG, "Start");
 					Intent intent = new Intent(MainActivity.this, BasicrunActivity.class); 
-					startActivity(intent);										
+					startActivityForResult(intent, 0);										
+				}
+		});
+		
+		final Button btnHistory = (Button) findViewById(R.id.btnHistory);
+		btnHistory.setOnClickListener(new OnClickListener() {
+				@Override
+				public void onClick(View v) {
+					Log.i(TAG, "History");
+
+					//Intent intent = new Intent(MainActivity.this, HistoryActivity.class); 
+					//startActivity(intent);
+										
 				}
 		});
 	}
@@ -71,6 +84,9 @@ public class MainActivity extends Activity{
 	public void onDestroy(){
 		super.onDestroy();
 		
+		DBHelper dbh = new DBHelper(this);
+		dbh.removeAllLocations();
+		Log.i(TAG, "removeAllLocations()");
 	}
 	
 	@Override

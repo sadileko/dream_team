@@ -26,8 +26,7 @@ public class HelpActivity extends Activity {
 				@Override
 				public void onClick(View v) {
 					Log.i(TAG, "Start");
-					Intent intent = new Intent(HelpActivity.this, MainActivity.class); 
-					startActivity(intent);										
+					finish();										
 				}
 		});
 	}

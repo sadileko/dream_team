@@ -47,8 +47,7 @@ public class SettingsActivity extends Activity {
 		btnBack.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				Intent intent = new Intent(SettingsActivity.this, MainActivity.class); 
-				startActivity(intent);
+				finish();
 			}
 		});
 		

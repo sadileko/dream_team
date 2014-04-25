@@ -103,10 +103,7 @@ public class BasicrunActivity extends Activity {
 			txtDistance = (TextView) findViewById(R.id.txtDistance);
 			txtProvider = (TextView) findViewById(R.id.txtProvider);
 			
-			chckLocated = (CheckBox) findViewById(R.id.chckLocated);
-			
-			// Keep screen on
-			getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON); 		
+			chckLocated = (CheckBox) findViewById(R.id.chckLocated);		
 					
 			//Intent filter for broadcast receiver
 			IntentFilter filter = new IntentFilter(RServiceRequestReceiver.PROCESS_RESPONSE);
@@ -125,8 +122,8 @@ public class BasicrunActivity extends Activity {
 	    	.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
 	    	    public void onClick(DialogInterface dialog, int which) {			      	
 	    	    	stopRService();
-					Intent intent = new Intent(BasicrunActivity.this, MainActivity.class); 
-					startActivity(intent);	    	    	
+	    	    	
+	    	    	finish();    	    	
 	    	    }
 	    	})
 	    	.setNegativeButton("No", null);	
@@ -147,7 +144,7 @@ public class BasicrunActivity extends Activity {
 					public void onClick(View v) {
 						stopRService();
 						Intent intent = new Intent(BasicrunActivity.this, HelpActivity.class); 
-						startActivity(intent);										
+						startActivityForResult(intent, 0);									
 					}
 			});
 			
@@ -175,10 +172,13 @@ public class BasicrunActivity extends Activity {
 			txtCurrentSpeed.setOnLongClickListener(new OnLongClickListener() { 
 		        @Override
 		        public boolean onLongClick(View v){    
-		        
-		        	Intent intent = hlp.showLocation(latitude, longtitude); 
-					startActivity(intent);
-					
+		       // if(latitude!=0 && longtitude !=0){
+		        	//Intent intent = hlp.showLocation(latitude, longtitude); 
+					//startActivity(intent);
+		        	
+		        	Intent intent = new Intent(BasicrunActivity.this, MapActivity.class); 
+					startActivity(intent);	
+		        //}
 		            return true;
 		        }
 		    });
