@@ -38,3 +38,5 @@ tmp/**/*
 # PDT-specific
 .buildpath
 /docs/
+#google play services
+google-play-services_lib/
