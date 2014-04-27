@@ -54,6 +54,7 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.ImageButton;
 import android.widget.TextView;
+import android.widget.Toast;
 
 public class BasicrunActivity extends Activity {
 	
@@ -90,7 +91,7 @@ public class BasicrunActivity extends Activity {
 			Log.d(TAG,"onCreate()");
 			
 			final DBHelper db = new DBHelper(getApplicationContext());
-			
+
 			//Handler for refreshing UI
 			myHandler = new Handler();
 			myHandler.post(stepsUpdate);
@@ -172,13 +173,12 @@ public class BasicrunActivity extends Activity {
 			txtCurrentSpeed.setOnLongClickListener(new OnLongClickListener() { 
 		        @Override
 		        public boolean onLongClick(View v){    
-		       // if(latitude!=0 && longtitude !=0){
-		        	//Intent intent = hlp.showLocation(latitude, longtitude); 
-					//startActivity(intent);
+		        	//Show MAP
+		        	Toast.makeText(getApplicationContext(), "Starting Google maps", Toast.LENGTH_SHORT).show();
 		        	
 		        	Intent intent = new Intent(BasicrunActivity.this, MapActivity.class); 
 					startActivity(intent);	
-		        //}
+
 		            return true;
 		        }
 		    });
@@ -196,7 +196,7 @@ public class BasicrunActivity extends Activity {
 		}
 
 		/*
-		 * Stops running serbvice
+		 * Stops running service
 		 */
 		public void stopRService()
 		{
@@ -206,7 +206,7 @@ public class BasicrunActivity extends Activity {
 		}
 		
 		/*
-		 * Checks wheter the service is running
+		 * Checks whether the service is running
 		 */
 		public boolean serviceRunning()
 		{

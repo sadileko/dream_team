@@ -84,9 +84,6 @@ public class MainActivity extends Activity{
 	public void onDestroy(){
 		super.onDestroy();
 		
-		DBHelper dbh = new DBHelper(this);
-		dbh.removeAllLocations();
-		Log.i(TAG, "removeAllLocations()");
 	}
 	
 	@Override

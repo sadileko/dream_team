@@ -1,3 +1,28 @@
+/***********************************************************************************************************************
+ *
+ * This file is part of the ${PROJECT_NAME} project
+
+ * ==========================================
+ *
+ * Copyright (C) ${YEAR} by University of West Bohemia (http://www.zcu.cz/en/)
+ *
+ ***********************************************************************************************************************
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
+ * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations under the License.
+ *
+ ***********************************************************************************************************************
+ *
+ * ${NAME}, ${YEAR}/${MONTH}/${DAY} ${HOUR}:${MINUTE} ${USER}
+ *
+ **********************************************************************************************************************/
+
 package cz.zcu.kiv.runstat.ui;
 
 import java.text.SimpleDateFormat;
@@ -5,11 +30,9 @@ import java.util.Date;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.GoogleMapOptions;
 import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
 
@@ -44,20 +67,6 @@ public class MapActivity extends Activity {
     	dbh.close();
     }
     
-    @Override
-	public void onDestroy(){
-		super.onDestroy();
-		
-		finish();
-	}
-    
-    @Override
-	public void onPause(){
-		super.onPause();
-
-		finish();
-	}
-    
     private Cursor getLocations() {
     	SQLiteDatabase db = dbh.getReadableDatabase();
     	Cursor cursor = db.query(DBHelper.TABLE, null, null, null, null, null, null);
@@ -68,13 +77,19 @@ public class MapActivity extends Activity {
     }
     
 	protected void setMarkers(Cursor cursor, long idPoint){
-		PolylineOptions po = new PolylineOptions().color(Color.argb(150,148,0,211)).geodesic(true);
+		PolylineOptions po = new PolylineOptions().color(Color.argb(125,14,4,161)).geodesic(true);
+		
+		long rows = cursor.getCount();
+		
 		while (cursor.moveToNext()) {
 
 			long id = cursor.getLong(0);
 			long timeMils = cursor.getLong(1);
 			int steps = cursor.getInt(2);
+			
 			float speed = cursor.getFloat(3);
+			float roundedSpeed = (float)Math.round(speed * 36) / 10;
+			
 			float distance = cursor.getFloat(4);
 			double latitude = cursor.getDouble(5);
 			double longitude = cursor.getDouble(6);	
@@ -85,8 +100,13 @@ public class MapActivity extends Activity {
 			Date resultdate = new Date(timeMils);
 			String time = ((sdf.format(resultdate)).toString());
 
-
-			addMarker(new LatLng(latitude, longitude), time, speed);	
+			long position = cursor.getPosition();
+			
+			if(position == 0 || position == (rows-1)){
+				distance = Math.round(distance);
+				addMarker(new LatLng(latitude, longitude), time, roundedSpeed, 270, distance);				
+			}
+			
 			po.add(new LatLng(latitude, longitude));
 			
 			if(idPoint==0||idPoint==id){
@@ -98,13 +118,21 @@ public class MapActivity extends Activity {
 		map.addPolyline(po);
 	}
 	
-	protected void addMarker(LatLng position, String time, float speed){
-		map.addMarker(new MarkerOptions()
-		.icon(BitmapDescriptorFactory.defaultMarker(270))
-		.title(time)
-		.snippet("Speed: " + Float.toString(speed))
-		//.anchor(0.0f, 1.0f)
-		.position(position));
+	protected void addMarker(LatLng position, String time, float speed, int color, float distance){
+		if(distance!=0){
+			map.addMarker(new MarkerOptions()
+			.icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_launcher))
+			.title(time)
+			.snippet("Distance: "+ distance + "m")
+			.position(position));
+		}
+		else{
+			map.addMarker(new MarkerOptions()
+			.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE))
+			.title(time)
+			.snippet("Speed: " + Float.toString(speed)+"km/h")
+			.position(position));
+		}
 	}
 }
 
