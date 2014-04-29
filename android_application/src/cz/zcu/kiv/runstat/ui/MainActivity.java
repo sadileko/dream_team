@@ -26,35 +26,35 @@
 package cz.zcu.kiv.runstat.ui;
 
 import cz.zcu.kiv.runstat.R;
-import cz.zcu.kiv.runstat.data.*;
-import android.net.Uri;
 import android.os.Bundle;
-import android.os.Handler;
 import android.app.Activity;
-import android.app.ActivityManager;
-import android.app.ActivityManager.RunningServiceInfo;
-import android.content.BroadcastReceiver;
-import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
-import android.widget.EditText;
-import android.widget.TextView;
+
 
 public class MainActivity extends Activity{
 
 	private final String TAG = this.getClass().getSimpleName();
 	
+	/*
+	 * Activity lifecycle
+	 */
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
-		Log.i(TAG, "onCreate()");
+		Log.d(TAG, "onCreate()");
+		
+		
+		/*
+		 * Buttons
+		 */
 		
 		final Button btnStart = (Button) findViewById(R.id.btnStart);
 		btnStart.setOnClickListener(new OnClickListener() {
@@ -85,6 +85,7 @@ public class MainActivity extends Activity{
 		super.onDestroy();
 		
 	}
+	
 	
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {

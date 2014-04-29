@@ -42,22 +42,77 @@ import org.ambientdynamix.contextplugins.pedometer.IPedometerStepInfo;
 import cz.zcu.kiv.runstat.ui.BasicrunActivity.RServiceRequestReceiver;
 import android.app.Service;
 import android.content.ComponentName;
-import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
-import android.database.sqlite.SQLiteDatabase;
 import android.location.Location;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Log;
 
+
 public class DynamixService extends Service
 {
-// Classname for logging purposes
-private final String TAG = this.getClass().getSimpleName();
+	// Classname for logging purposes
+	private final String TAG = this.getClass().getSimpleName();
 
-private DynamixPlugin dx = null;
+	private DynamixPlugin dx = null;
+
+	private int runType = 0;
+	private boolean firstCall = true;
+
+	@Override
+	public IBinder onBind(Intent arg0)
+	{
+		return null;
+	}
+
+	@Override
+	public int onStartCommand(Intent intent, int flags, int startId)
+	{
+		Log.d(TAG, "onStartCommand");
+    
+		runType = intent.getIntExtra("runType", 0);
+    
+		super.onStartCommand(intent, flags, startId);       
+		return START_NOT_STICKY;
+	}
+
+	@Override
+	public void onCreate()
+	{
+		Log.d(TAG, "onCreate()");
+    
+		dx = new DynamixPlugin();
+    
+		try {
+			bindService(new Intent(IDynamixFacade.class.getName()), dx.sConnection, Context.BIND_AUTO_CREATE);
+
+		} catch (java.lang.SecurityException ex) {
+			Log.e(TAG, "Error while binding Dynamix");
+		}
+	}
+
+	@Override
+	public void onDestroy()
+	{
+		Log.d(TAG, "onDestroy()");
+    
+		//Clear all variables 
+		try {
+    	
+			dx.dynamix.removeAllContextSupport();
+			dx.dynamix.closeSession();		
+			unbindService(dx.sConnection);
+			dx.dynamix = null;
+			dx = null;
+		
+		} catch (RemoteException e) {
+			e.printStackTrace();
+		}
+    
+		super.onDestroy();
+	} 
 
 
 public class DynamixPlugin {
@@ -299,8 +354,11 @@ public class DynamixPlugin {
 			     prevLat = latitude;
 			     prevLng = longtitude;
 			     
+			     //get location
 			     latitude = data.getLatitude();
 			     longtitude = data.getLongitude();
+			     
+			     //get current speed
 			     speed = data.getSpeed();
 			     
 			     //Calculate distance between two locations
@@ -318,15 +376,15 @@ public class DynamixPlugin {
 			     }
 			     
 			     provider = data.getProvider();	  
-			     
-			     Log.d(TAG, "Provider: "+provider);
-			     Log.d(TAG, "Speed: " + Float.toString(speed));
-			     
+
 			     //Save location to DB
-			     db.addToDatabase(Double.toString(latitude), Double.toString(longtitude), steps, Float.toString(speed),Float.toString(distance));
+			     db.addToDatabase(Double.toString(latitude), Double.toString(longtitude), runType, steps, Float.toString(speed),Float.toString(distance), firstCall);
 			     
 			     //Send data to UI
 			     broadcast();
+			     
+			     //Lock run_id
+			     firstCall = false;
 				}
 
 			} else
@@ -410,68 +468,16 @@ public class DynamixPlugin {
         broadcastIntent.setAction(RServiceRequestReceiver.PROCESS_RESPONSE);
         broadcastIntent.addCategory(Intent.CATEGORY_DEFAULT);
         
-        broadcastIntent.putExtra("DxSteps", dx.steps);
-        broadcastIntent.putExtra("DxLat", dx.latitude);
-        broadcastIntent.putExtra("DxLng", dx.longtitude);
-        broadcastIntent.putExtra("DxSpeed", dx.speed);
-        broadcastIntent.putExtra("DxDistance", dx.distance);
-        broadcastIntent.putExtra("DxProvider", dx.provider);
+        broadcastIntent.putExtra("DxSteps", this.steps);
+        broadcastIntent.putExtra("DxLat", this.latitude);
+        broadcastIntent.putExtra("DxLng", this.longtitude);
+        broadcastIntent.putExtra("DxSpeed", this.speed);
+        broadcastIntent.putExtra("DxDistance", this.distance);
+        broadcastIntent.putExtra("DxProvider", this.provider);
         
         sendBroadcast(broadcastIntent);
 	}
 		
 }
-
-
-@Override
-public IBinder onBind(Intent arg0)
-{
-    return null;
-}
-
-@Override
-public int onStartCommand(Intent intent, int flags, int startId)
-{
-    Log.e(TAG, "onStartCommand");
-    super.onStartCommand(intent, flags, startId);       
-    return START_NOT_STICKY;
-}
-
-@Override
-public void onCreate()
-{
-    Log.e(TAG, "onCreate");
-    
-    dx = new DynamixPlugin();
-    
-    try {
-    	bindService(new Intent(IDynamixFacade.class.getName()), dx.sConnection, Context.BIND_AUTO_CREATE);
-
-    } catch (java.lang.SecurityException ex) {
-        Log.i(TAG, "Error while binding Dynamix");
-    }
-}
-
-@Override
-public void onDestroy()
-{
-    super.onDestroy();
-    Log.e(TAG, "onDestroy");
-    
-    try {
-    	
-    	dx.dynamix.removeAllContextSupport();
-		dx.dynamix.closeSession();
-		dx.steps = 0;
-		dx.longtitude = 0;
-		dx.latitude = 0;
-		unbindService(dx.sConnection);
-		dx = null;
-		stopSelf();
-		
-	} catch (RemoteException e) {
-		e.printStackTrace();
-	}
-} 
 
 }

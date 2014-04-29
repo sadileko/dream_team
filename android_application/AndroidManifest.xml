@@ -74,7 +74,7 @@
         <activity
             android:name="cz.zcu.kiv.runstat.ui.MapActivity"/>
         <uses-library android:name="com.google.android.maps" />
-         
+                 
         <service 
             android:name="cz.zcu.kiv.runstat.data.DynamixService" 
             android:enabled="true" />

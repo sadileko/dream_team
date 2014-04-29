@@ -30,17 +30,13 @@ import java.util.List;
 import cz.zcu.kiv.runstat.R;
 import cz.zcu.kiv.runstat.data.DBHelper;
 import cz.zcu.kiv.runstat.data.DynamixService;
-import cz.zcu.kiv.runstat.data.Helper;
 import android.app.Activity;
-import android.app.ActivityManager;
-import android.app.ActivityManager.RunningServiceInfo;
 import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.graphics.Typeface;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
@@ -49,24 +45,22 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnLongClickListener;
-import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
+
 public class BasicrunActivity extends Activity {
 	
-	// Classname for logging purposes
+		// Classname for logging purposes
 		private final String TAG = this.getClass().getSimpleName();
 			
-		//Helper instance
-		public final Helper hlp = new Helper(); 
-		
 		//BroadcastReciever instance
 		private RServiceRequestReceiver receiver;
 		 
+		//Custom variables
 		public int steps = 0;
 		public double stepForce = 0.0;
 		public double latitude = 0.0;
@@ -82,55 +76,67 @@ public class BasicrunActivity extends Activity {
 		private TextView txtDistance;
 		private CheckBox chckLocated;
 		private TextView  txtProvider;
+		private TextView txtRunID;
+		
+		
+		/*
+		 * Activity lifecycle
+		 */
 		
 		@Override
 		protected void onCreate(Bundle savedInstanceState) {
 			super.onCreate(savedInstanceState);
 			setContentView(R.layout.activity_basicrun);
-
-			Log.d(TAG,"onCreate()");
+			Log.d(TAG,"onCreate()");			
 			
+			/*
+			 * 	View
+			 */
+			txtSteps = (TextView) findViewById(R.id.txtSteps);			
+			txtCurrentSpeed = (TextView) findViewById(R.id.txtCurrentSpeed);			
+			txtDistance = (TextView) findViewById(R.id.txtDistance);
+			txtProvider = (TextView) findViewById(R.id.txtProvider);			
+			chckLocated = (CheckBox) findViewById(R.id.chckLocated);							
+			txtRunID = (TextView) findViewById(R.id.txtRunID);
+			
+			// Instance for debuging - removing locations and write to log
 			final DBHelper db = new DBHelper(getApplicationContext());
 
 			//Handler for refreshing UI
 			myHandler = new Handler();
 			myHandler.post(stepsUpdate);
-			
-			//Inicialize widgets
-			txtSteps = (TextView) findViewById(R.id.txtSteps);
-			
-			txtCurrentSpeed = (TextView) findViewById(R.id.txtCurrentSpeed);
-			
-			txtDistance = (TextView) findViewById(R.id.txtDistance);
-			txtProvider = (TextView) findViewById(R.id.txtProvider);
-			
-			chckLocated = (CheckBox) findViewById(R.id.chckLocated);		
-					
+						
 			//Intent filter for broadcast receiver
 			IntentFilter filter = new IntentFilter(RServiceRequestReceiver.PROCESS_RESPONSE);
 	        filter.addCategory(Intent.CATEGORY_DEFAULT);
 			receiver = new RServiceRequestReceiver();
 	        registerReceiver(receiver, filter);
 	        
+	        //Start dynamix service
 	        startRService();
 	        
-	        //Message box
+	        //Message box 
 	        final AlertDialog.Builder builder = new AlertDialog.Builder(this);
 	    	builder
 	    	.setTitle("Exit running")
 	    	.setMessage("Are you sure?")
 	    	.setIcon(android.R.drawable.ic_dialog_alert)
 	    	.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
-	    	    public void onClick(DialogInterface dialog, int which) {			      	
-	    	    	stopRService();
+	    	    public void onClick(DialogInterface dialog, int which) {
 	    	    	
+	    	    	//Stop service and finish activity
+	    	    	stopRService();	    	    	
 	    	    	finish();    	    	
 	    	    }
 	    	})
 	    	.setNegativeButton("No", null);	
 	    	
 	    	
-			//********Buttons**********				
+			/*
+			 * 	Buttons			
+			 */
+	    	
+	    	//Close application
 			final Button btnEnd = (Button) findViewById(R.id.btnEnd);
 			btnEnd.setOnClickListener(new OnClickListener() {
 					@Override
@@ -139,15 +145,36 @@ public class BasicrunActivity extends Activity {
 					}
 			});
 			
+			//Show help
 			final ImageButton btnHelp = (ImageButton) findViewById(R.id.btnHelp);
 			btnHelp.setOnClickListener(new OnClickListener() {
 					@Override
 					public void onClick(View v) {
-						stopRService();
 						Intent intent = new Intent(BasicrunActivity.this, HelpActivity.class); 
 						startActivityForResult(intent, 0);									
 					}
 			});
+			
+			/*
+			 * TextViews
+			 */
+			
+			//Current speed long click listener
+			txtCurrentSpeed.setOnLongClickListener(new OnLongClickListener() { 
+		        @Override
+		        public boolean onLongClick(View v){    
+		        	//Show MAP
+		        	Toast.makeText(getApplicationContext(), "Starting Google maps", Toast.LENGTH_SHORT).show();
+		        	
+		        	Intent intent = new Intent(BasicrunActivity.this, MapActivity.class); 
+		        	intent.putExtra("runID", Integer.parseInt(txtRunID.getText().toString()) );
+					startActivity(intent);	
+
+		            return true;
+		        }
+		    });
+			
+			//DEBUG
 			
 			final Button button1 = (Button) findViewById(R.id.button1);
 			button1.setOnClickListener(new OnClickListener() {
@@ -157,7 +184,7 @@ public class BasicrunActivity extends Activity {
 				         
 				        for (int i =0; i<locations.size();i++) {
 				            String log = "From DB:" + locations.get(i);
-				            Log.d("TAG ", log);										
+				            Log.v("TAG ", log);										
 				        }
 					}
 			});
@@ -170,67 +197,18 @@ public class BasicrunActivity extends Activity {
 					}
 			});
 			
-			txtCurrentSpeed.setOnLongClickListener(new OnLongClickListener() { 
-		        @Override
-		        public boolean onLongClick(View v){    
-		        	//Show MAP
-		        	Toast.makeText(getApplicationContext(), "Starting Google maps", Toast.LENGTH_SHORT).show();
-		        	
-		        	Intent intent = new Intent(BasicrunActivity.this, MapActivity.class); 
-					startActivity(intent);	
-
-		            return true;
-		        }
-		    });
-								
-	    	
 		}
 		
-		/*
-		 * Start service
-		 */
-		public void startRService(){
-			Log.d(TAG, "startRService()");
-			Intent intent = new Intent(BasicrunActivity.this, DynamixService.class); 
-			startService(intent); 		
-		}
-
-		/*
-		 * Stops running service
-		 */
-		public void stopRService()
-		{
-			Log.d(TAG, "stopRService()");
-			Intent intent = new Intent(BasicrunActivity.this, DynamixService.class);		
-			stopService(intent);
-		}
-		
-		/*
-		 * Checks whether the service is running
-		 */
-		public boolean serviceRunning()
-		{
-			Log.d(TAG, "serviceRunning()");
-			ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
-			for (RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
-				if (DynamixService.class.getName().equals(service.service.getClassName())) {
-					Log.i(TAG, "serviceRunning() -> true");
-					return true;
-				}
-			}
-			Log.i(TAG, "serviceRunning() -> false");
-			return false;
-		}
-		
-
 		
 		@Override
 		public void onDestroy(){
 			super.onDestroy();
 			
 			stopRService();
+			unregisterReceiver(receiver);
 		}
 		
+
 		@Override
 		public boolean onCreateOptionsMenu(Menu menu) {
 			// Inflate the menu; this adds items to the action bar if it is present.
@@ -238,10 +216,7 @@ public class BasicrunActivity extends Activity {
 			return true;
 		}	
 		
-		/*
-		 * (non-Javadoc)
-		 * @see android.app.Activity#onOptionsItemSelected(android.view.MenuItem)
-		 */
+		
 		@Override
 		public boolean onOptionsItemSelected(MenuItem item) {
 		    // Handle item selection
@@ -259,6 +234,29 @@ public class BasicrunActivity extends Activity {
 		    }
 		}
 		
+		
+		/*
+		 * Start service
+		 */
+		public void startRService(){
+			Log.d(TAG, "startRService()");
+			Intent intent = new Intent(BasicrunActivity.this, DynamixService.class); 
+			intent.putExtra("runType", 0);
+			startService(intent); 		
+		}
+
+		
+		/*
+		 * Stops running service
+		 */
+		public void stopRService()
+		{
+			Log.d(TAG, "stopRService()");
+			Intent intent = new Intent(BasicrunActivity.this, DynamixService.class);		
+			stopService(intent);
+		}
+		
+				
 		/*
 		 * Refreshing UI
 		 */
@@ -271,7 +269,7 @@ public class BasicrunActivity extends Activity {
 			       float roundedSpeed= (float)Math.round(speed * 36) / 10;
 			       txtCurrentSpeed.setText("" + roundedSpeed);
 			       
-			       txtDistance.setText(""+ distance +" m");
+			       txtDistance.setText(""+ Math.round(distance) +" m");
 			       
 			       txtProvider.setText("Provider: " + provider);
 			       
@@ -279,6 +277,7 @@ public class BasicrunActivity extends Activity {
 			    }
 		};
 
+		
 		/*
 		 * Broadcast receiver for receiving values from service
 		 */
@@ -288,6 +287,7 @@ public class BasicrunActivity extends Activity {
 	 
 	        @Override
 	        public void onReceive(Context context, Intent intent) {
+	        	
 	            steps = intent.getIntExtra("DxSteps", 0);
 	            latitude = intent.getDoubleExtra("DxLat", 0.0);
 	            longtitude = intent.getDoubleExtra("DxLng", 0.0);
@@ -295,7 +295,7 @@ public class BasicrunActivity extends Activity {
 	            distance = intent.getFloatExtra("DxDistance", 0);
 	            provider = intent.getStringExtra("DxProvider").toUpperCase();
 	            
-	            if(latitude!=0.0)
+	            if(latitude!=0.0 && !chckLocated.isChecked())
 	            	chckLocated.setChecked(true);
 	        }
 		}

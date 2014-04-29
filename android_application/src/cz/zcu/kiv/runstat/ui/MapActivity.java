@@ -39,14 +39,19 @@ import com.google.android.gms.maps.model.PolylineOptions;
 import cz.zcu.kiv.runstat.R;
 import cz.zcu.kiv.runstat.data.DBHelper;
 import android.app.Activity;
+import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
 
+
 public class MapActivity extends Activity {
 
+	// Classname for logging purposes
+	private final String TAG = this.getClass().getSimpleName();
+	
 	GoogleMap map;
 	DBHelper dbh;
 
@@ -54,28 +59,28 @@ public class MapActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_map);
+        Log.d(TAG,"onCreate()");
+        
+        //Get runID form given intent
+        Intent i = this.getIntent();
+        int runID = i.getIntExtra("runID", 1);
         
         dbh = new DBHelper(this);
         
         map = ((MapFragment) getFragmentManager().findFragmentById(R.id.map)).getMap();
 
-    	Cursor cursor = getLocations();
-
+        Cursor cursor = dbh.getLocationsByRunId(runID);
+        
     	setMarkers(cursor, 0);
     	
     	cursor.close();
     	dbh.close();
     }
     
-    private Cursor getLocations() {
-    	SQLiteDatabase db = dbh.getReadableDatabase();
-    	Cursor cursor = db.query(DBHelper.TABLE, null, null, null, null, null, null);
-
-    	startManagingCursor(cursor);
-    	return cursor;
-    	
-    }
     
+    /*
+     * Pin given locations to map
+     */
 	protected void setMarkers(Cursor cursor, long idPoint){
 		PolylineOptions po = new PolylineOptions().color(Color.argb(125,14,4,161)).geodesic(true);
 		
@@ -84,16 +89,16 @@ public class MapActivity extends Activity {
 		while (cursor.moveToNext()) {
 
 			long id = cursor.getLong(0);
-			long timeMils = cursor.getLong(1);
-			int steps = cursor.getInt(2);
+			long timeMils = cursor.getLong(3);
+			//int steps = cursor.getInt(4);		Unused, for now
 			
-			float speed = cursor.getFloat(3);
+			//Convert speed to km/h and round
+			float speed = cursor.getFloat(5);
 			float roundedSpeed = (float)Math.round(speed * 36) / 10;
 			
-			float distance = cursor.getFloat(4);
-			double latitude = cursor.getDouble(5);
-			double longitude = cursor.getDouble(6);	
-			
+			float distance = cursor.getFloat(6);
+			double latitude = cursor.getDouble(7);
+			double longitude = cursor.getDouble(8);			
 			
 			SimpleDateFormat sdf = new SimpleDateFormat("HH:mm, dd.MMM.yyyy");
 			
@@ -118,6 +123,10 @@ public class MapActivity extends Activity {
 		map.addPolyline(po);
 	}
 	
+	
+	/*
+	 * Add marker to map
+	 */
 	protected void addMarker(LatLng position, String time, float speed, int color, float distance){
 		if(distance!=0){
 			map.addMarker(new MarkerOptions()
