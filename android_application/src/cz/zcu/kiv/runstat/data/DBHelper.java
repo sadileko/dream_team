@@ -25,6 +25,7 @@
 
 package cz.zcu.kiv.runstat.data;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -58,10 +59,12 @@ public class DBHelper extends SQLiteOpenHelper {
 	public static final String RUN_ID = "run_id";	//Id bìhu
 	
 	private long lastRowID = 1;
-	
+	private Context ctx;
 	
 	public DBHelper(Context context) {
 		super(context, DATABASE_NAME, null, DATABASE_VERSION);
+		
+		this.ctx = context;
 	}
 
 	
@@ -147,6 +150,37 @@ public class DBHelper extends SQLiteOpenHelper {
 	}
 	
 	
+	/*
+	 * Get all running events
+	 */
+	public List<LocationItem> getRunningEvents() throws IOException{
+			//removeSingleMarkerLocations();
+		
+			List<LocationItem> locationsList = new ArrayList<LocationItem>();
+	        String selectQuery = "SELECT  * FROM " + TABLE;
+	 
+	        SQLiteDatabase db = this.getWritableDatabase();
+	        Cursor cursor = db.rawQuery(selectQuery, null);
+	        
+	        long runID = 0;
+	        long temp = 0;
+	                
+	        if (cursor.moveToFirst()) {
+	            do {
+	            	runID = cursor.getLong(1);
+	            	
+	            	if(runID != temp || cursor.getPosition() == 0){
+	            		locationsList.add(new LocationItem(cursor.getLong(3), "", runID, cursor.getDouble(7), cursor.getDouble(8), ctx));
+	            	}
+	            	
+	            	temp = runID;
+	            	
+	            } while (cursor.moveToNext());
+	        }
+	        
+	        return locationsList;
+	}
+	
 	
 	/*
 	 * Returns all locations from DB as list of strings
@@ -174,6 +208,7 @@ public class DBHelper extends SQLiteOpenHelper {
         // return contact list
         return locationList;
     }
+	
 	
 	
 	/*
@@ -215,10 +250,10 @@ public class DBHelper extends SQLiteOpenHelper {
             do {
             	runID = cursor.getLong(1);
             	
-            	if(runID != runIDprev && cursor.getPosition() != 0){
-            		location loc = new location(runIDprev,count);
+            	if(runID!=runIDprev){
+            		location loc = new location(runID,count);
             		locList.add(loc);
-            		count = 0;
+            		count = 1;
             	}
             	else{
             		count++;
@@ -231,13 +266,14 @@ public class DBHelper extends SQLiteOpenHelper {
         
         String deleteQuery = "DELETE FROM "+ TABLE + " WHERE ";
         boolean isFirst = true;
-        int countDel = 1;
+        int countDel = 0;
         
         for(int i=0; i<locList.size();i++){
         	if(locList.get(i).count <=1){
         		if(isFirst){
         			deleteQuery += "run_id="+locList.get(i).runID;
         			isFirst = false;
+        			countDel++;
         		}
         		else{
         			deleteQuery += " OR run_id="+ locList.get(i).runID;
@@ -247,8 +283,8 @@ public class DBHelper extends SQLiteOpenHelper {
         	}
         }
          
-        if(countDel > 1){
-        	db.execSQL(deleteQuery);
+        if(countDel > 0){
+        	db.execSQL(deleteQuery, null);
         	Log.i(TAG, countDel + " records was deleted");
         }
 	}

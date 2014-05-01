@@ -72,8 +72,8 @@ public class MainActivity extends Activity{
 				public void onClick(View v) {
 					Log.i(TAG, "History");
 
-					//Intent intent = new Intent(MainActivity.this, HistoryActivity.class); 
-					//startActivity(intent);
+					Intent intent = new Intent(MainActivity.this, HistoryActivity.class); 
+					startActivityForResult(intent, 0);
 										
 				}
 		});

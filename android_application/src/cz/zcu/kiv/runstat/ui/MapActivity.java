@@ -65,7 +65,7 @@ public class MapActivity extends Activity {
         
         //Get runID form given intent
         Intent i = this.getIntent();
-        long runID = i.getIntExtra("runID", 1);
+        long runID = i.getLongExtra("runID", 1);
         
         dbh = new DBHelper(this);
         
