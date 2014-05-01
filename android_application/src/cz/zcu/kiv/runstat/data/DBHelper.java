@@ -40,6 +40,7 @@ import android.util.Log;
 public class DBHelper extends SQLiteOpenHelper {
 	
 	private final String TAG = this.getClass().getSimpleName();
+	
 	private static final String DATABASE_NAME = "locationDB";
 	private static final int DATABASE_VERSION = 1;
 
@@ -56,7 +57,7 @@ public class DBHelper extends SQLiteOpenHelper {
 	public static final String TYPE = "type";			//Typ bìhu, 0 - zakladni, 1 - distancni, 2 - casovy
 	public static final String RUN_ID = "run_id";	//Id bìhu
 	
-	private int lastRow = 1;
+	private long lastRowID = 1;
 	
 	
 	public DBHelper(Context context) {
@@ -66,12 +67,13 @@ public class DBHelper extends SQLiteOpenHelper {
 	
 	@Override
 	public void onCreate(SQLiteDatabase db) {
+		
 		String sql = "create table " + TABLE + "( " + BaseColumns._ID
 				+ " integer primary key autoincrement, " + RUN_ID + " integer," + TYPE + " integer," + TIME + " integer, "
 				+ STEPS + " integer, "+ SPEED +" text,"+ DISTANCE+ " text," + LATITUDE + " text, " + LONGITUDE + " text);";
 		
 		db.execSQL(sql);
-		Log.i(TAG, "Creating DB: "+sql);
+		Log.i(TAG, "Created DB: "+sql);
 	}
 
 	
@@ -92,10 +94,10 @@ public class DBHelper extends SQLiteOpenHelper {
 		ContentValues values = new ContentValues();
 				
 		if(firstCall){
-			lastRow = getLastRowId() + 1; 
+			lastRowID = getLastRowId() + 1; 
 		}
 		
-		values.put(RUN_ID, lastRow);
+		values.put(RUN_ID, lastRowID);
 		values.put(TYPE, type);
 		values.put(TIME, System.currentTimeMillis());
 		values.put(STEPS, steps);
@@ -114,7 +116,7 @@ public class DBHelper extends SQLiteOpenHelper {
 	/*
 	 * Get last row runID
 	 */
-	public int getLastRowId(){
+	public long getLastRowId(){
 		
 		
 		String selectQuery = "SELECT  * FROM " + TABLE;
@@ -122,7 +124,7 @@ public class DBHelper extends SQLiteOpenHelper {
         SQLiteDatabase db = this.getWritableDatabase();
         Cursor cursor = db.rawQuery(selectQuery, null);
         
-        int lastRow=0;
+        long lastRow = 0;
         if(cursor.getCount()>0){
         	cursor.moveToLast();
         	lastRow = cursor.getInt(1);
@@ -135,7 +137,7 @@ public class DBHelper extends SQLiteOpenHelper {
 	/*
 	 * Get locations by given runId
 	 */
-	public Cursor getLocationsByRunId(int runID){
+	public Cursor getLocationsByRunId(long runID){
 		String selectQuery = "SELECT  * FROM " + TABLE + " WHERE run_id="+runID;
 		 
         SQLiteDatabase db = this.getWritableDatabase();
@@ -143,6 +145,7 @@ public class DBHelper extends SQLiteOpenHelper {
         
         return cursor;
 	}
+	
 	
 	
 	/*
@@ -179,5 +182,86 @@ public class DBHelper extends SQLiteOpenHelper {
 	public void removeAllLocations(){
 		SQLiteDatabase db = this.getWritableDatabase(); // helper is object extends SQLiteOpenHelper
 	    db.delete(TABLE, null, null);
+	}
+	
+	
+	/*
+	 * Removes locations by given RunId
+	 */
+	public void removeLocationByRunID(long runID){
+		String deleteQuery = "DELETE FROM "+ TABLE + " WHERE run_id=" + runID;
+		SQLiteDatabase db = this.getWritableDatabase();
+		
+		db.execSQL(deleteQuery);
+		Log.i(TAG, "RunId: " + runID + " deleted succesfully.");
+	}
+	
+	
+	/*
+	 * Removes locations where is only one/two markers
+	 */
+	public void removeSingleMarkerLocations(){
+		String selectQuery = "SELECT  * FROM " + TABLE;
+		 
+        SQLiteDatabase db = this.getWritableDatabase();
+        Cursor cursor = db.rawQuery(selectQuery, null);
+        
+        List<location> locList = new ArrayList<location>();
+        long runIDprev = 0;
+        long runID = 0;
+        long count = 0;
+        
+        if (cursor.moveToFirst()) {
+            do {
+            	runID = cursor.getLong(1);
+            	
+            	if(runID != runIDprev && cursor.getPosition() != 0){
+            		location loc = new location(runIDprev,count);
+            		locList.add(loc);
+            		count = 0;
+            	}
+            	else{
+            		count++;
+            	}
+            	
+            	runIDprev = runID;
+            	
+            } while (cursor.moveToNext());
+        }
+        
+        String deleteQuery = "DELETE FROM "+ TABLE + " WHERE ";
+        boolean isFirst = true;
+        int countDel = 1;
+        
+        for(int i=0; i<locList.size();i++){
+        	if(locList.get(i).count <=1){
+        		if(isFirst){
+        			deleteQuery += "run_id="+locList.get(i).runID;
+        			isFirst = false;
+        		}
+        		else{
+        			deleteQuery += " OR run_id="+ locList.get(i).runID;
+        			countDel++;
+        		}
+        		
+        	}
+        }
+         
+        if(countDel > 1){
+        	db.execSQL(deleteQuery);
+        	Log.i(TAG, countDel + " records was deleted");
+        }
+	}
+	
+	
+	private class location{
+		
+		public long runID;
+		public long count;
+		
+		public location(long runID, long count){
+			this.runID = runID;
+			this.count = count;
+		}
 	}
 }

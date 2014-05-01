@@ -27,6 +27,7 @@ package cz.zcu.kiv.runstat.ui;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Locale;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -41,7 +42,6 @@ import cz.zcu.kiv.runstat.data.DBHelper;
 import android.app.Activity;
 import android.content.Intent;
 import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
@@ -51,6 +51,8 @@ public class MapActivity extends Activity {
 
 	// Classname for logging purposes
 	private final String TAG = this.getClass().getSimpleName();
+	
+	private Locale locale = new Locale("cs", "CZ");
 	
 	GoogleMap map;
 	DBHelper dbh;
@@ -63,7 +65,7 @@ public class MapActivity extends Activity {
         
         //Get runID form given intent
         Intent i = this.getIntent();
-        int runID = i.getIntExtra("runID", 1);
+        long runID = i.getIntExtra("runID", 1);
         
         dbh = new DBHelper(this);
         
@@ -100,7 +102,7 @@ public class MapActivity extends Activity {
 			double latitude = cursor.getDouble(7);
 			double longitude = cursor.getDouble(8);			
 			
-			SimpleDateFormat sdf = new SimpleDateFormat("HH:mm, dd.MMM.yyyy");
+			SimpleDateFormat sdf = new SimpleDateFormat("HH:mm, dd.MMM.yyyy", locale);
 			
 			Date resultdate = new Date(timeMils);
 			String time = ((sdf.format(resultdate)).toString());

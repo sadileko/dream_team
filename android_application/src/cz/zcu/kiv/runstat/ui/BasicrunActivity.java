@@ -193,7 +193,9 @@ public class BasicrunActivity extends Activity {
 			button2.setOnClickListener(new OnClickListener() {
 					@Override
 					public void onClick(View v) {
-						db.removeAllLocations();
+						//db.removeAllLocations();
+						//db.removeSingleMarkerLocations();
+						db.removeLocationByRunID( Long.parseLong( txtRunID.getText().toString() ) );
 					}
 			});
 			
