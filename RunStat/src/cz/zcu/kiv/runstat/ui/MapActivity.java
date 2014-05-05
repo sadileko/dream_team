@@ -71,6 +71,7 @@ public class MapActivity extends Activity {
         
         map = ((MapFragment) getFragmentManager().findFragmentById(R.id.map)).getMap();
 
+        //Load locaitons with specific run_id from DB
         Cursor cursor = dbh.getLocationsByRunId(runID);
         
     	setMarkers(cursor, 0);

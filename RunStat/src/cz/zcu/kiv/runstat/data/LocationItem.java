@@ -33,7 +33,6 @@ import java.util.Locale;
 import android.content.Context;
 
 
-
 public class LocationItem {
 	
 		public String locationTime;

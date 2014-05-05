@@ -1,3 +1,28 @@
+/***********************************************************************************************************************
+ *
+ * This file is part of the ${PROJECT_NAME} project
+
+ * ==========================================
+ *
+ * Copyright (C) ${YEAR} by University of West Bohemia (http://www.zcu.cz/en/)
+ *
+ ***********************************************************************************************************************
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
+ * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations under the License.
+ *
+ ***********************************************************************************************************************
+ *
+ * ${NAME}, ${YEAR}/${MONTH}/${DAY} ${HOUR}:${MINUTE} ${USER}
+ *
+ **********************************************************************************************************************/
+
 package cz.zcu.kiv.runstat.data;
 
 import java.io.BufferedReader;
@@ -20,6 +45,7 @@ import cz.zcu.kiv.runstat.R;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.app.Activity;
+import android.graphics.Color;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -44,7 +70,8 @@ public class DbSync extends Activity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_dbsync);
-
+        Log.d(TAG, "onCreate()");
+        
         dbh = new DBHelper(getApplicationContext());
         
         Button insert=(Button) findViewById(R.id.btnSync);
@@ -60,18 +87,17 @@ public class DbSync extends Activity {
 
 		}
 	});
-    }
+        
+}
     
     
-    
-    
-    private class postOperation extends AsyncTask<String, Void, String> {
+private class postOperation extends AsyncTask<String, Void, String> {
 
     	private final String TAG = this.getClass().getSimpleName();
     	
         @Override
         protected String doInBackground(String... params) {
-        	Log.i(TAG, "execute");
+        	Log.i(TAG, "doInBackground()");
         	
         	List<LocationItem> locations = dbh.getAllLocationsAsList();
         	
@@ -104,14 +130,15 @@ public class DbSync extends Activity {
         @Override
         protected void onProgressUpdate(Void... values) {}
 
-        
+        /*
+         * Insert location to server over POST request
+         */
         public void insert(long run_id, int run_type, String time, int steps, float speed, float distance, double lat, double lng)
         {
         	ArrayList<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>();
      
         	String strRun_id = String.valueOf(run_id);
         	String strRun_type = String.valueOf(run_type);
-        	//String strTime = String.valueOf(time);
         	String strSteps = String.valueOf(steps);
         	String strSpeed = String.valueOf(speed);
         	String strDistance = String.valueOf(distance);
@@ -146,6 +173,8 @@ public class DbSync extends Activity {
             catch(Exception e)
             {
             	Log.e(TAG, e.toString());
+            	progressUp();
+            	pBarSync.setBackgroundColor(Color.RED);
             }     
             
             try
@@ -169,6 +198,8 @@ public class DbSync extends Activity {
             catch(Exception e)
             {
                 Log.e(TAG, e.toString());
+                progressUp();
+            	pBarSync.setBackgroundColor(Color.RED);
             }     
            
             try
@@ -190,35 +221,18 @@ public class DbSync extends Activity {
             catch(Exception e)
             {
                 Log.e(TAG, e.toString());
+                progressUp();
+            	pBarSync.setBackgroundColor(Color.RED);
             }
         }
         
+        /*
+         * Increment progressbar
+         */
         private void progressUp(){
         	pBarSync.setProgress(pBarSync.getProgress() + 1);
         }
         
-        /*
-        public void postData() {
-            // Create a new HttpClient and Post Header
-            HttpClient httpclient = new DefaultHttpClient();
-            HttpPost httppost = new HttpPost("http://tomasbouda.cz/zswi/dbHandler/insert.php");
-
-            try {
-                // Add your data
-                List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(2);
-                nameValuePairs.add(new BasicNameValuePair("lat", lat));
-                nameValuePairs.add(new BasicNameValuePair("lng", lng));
-                httppost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
-
-                // Execute HTTP Post Request
-                HttpResponse response = httpclient.execute(httppost);
-
-            } catch (ClientProtocolException e) {
-                // TODO Auto-generated catch block
-            } catch (IOException e) {
-                Log.e("Async", e.toString());
-            }
-        } */
     }
     
 }
