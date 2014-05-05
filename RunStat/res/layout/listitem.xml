@@ -13,21 +13,58 @@
         android:src="@drawable/location_icon" />
 
     <TextView
-        android:id="@+id/textView1"
+        android:id="@+id/txtName"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginLeft="23dp"
         android:layout_marginTop="10dp"
         android:layout_toRightOf="@+id/imageView1"
         android:text="CodeLearn Chapter 1"
-        android:textSize="16sp" />
+        android:textSize="16sp"
+        android:textStyle="bold" />
 
     <TextView
-        android:id="@+id/textView2"
+        android:id="@+id/txtLocation"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignBottom="@+id/imageView1"
-        android:layout_alignLeft="@+id/textView1"
+        android:layout_alignLeft="@+id/txtName"
+        android:layout_below="@+id/txtName"
         android:text="Description" />
+
+    <TextView
+        android:id="@+id/txtHistoryDistance"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/txtLocation"
+        android:layout_below="@+id/txtLocation"
+        android:text="Small Text"
+        android:textAppearance="?android:attr/textAppearanceSmall" />
+
+    <TextView
+        android:id="@+id/txtHistoryAvgSpeed"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/txtHistoryDistance"
+        android:layout_below="@+id/txtHistoryDistance"
+        android:text="Small Text"
+        android:textAppearance="?android:attr/textAppearanceSmall" />
+
+    <TextView
+        android:id="@+id/txtHistoryMaxSpeed"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/txtHistoryAvgSpeed"
+        android:layout_below="@+id/txtHistoryAvgSpeed"
+        android:text="Small Text"
+        android:textAppearance="?android:attr/textAppearanceSmall" />
+
+    <TextView
+        android:id="@+id/txtHistoryDuration"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/txtHistoryMaxSpeed"
+        android:layout_below="@+id/txtHistoryMaxSpeed"
+        android:text="Small Text"
+        android:textAppearance="?android:attr/textAppearanceSmall" />
 
 </RelativeLayout> 

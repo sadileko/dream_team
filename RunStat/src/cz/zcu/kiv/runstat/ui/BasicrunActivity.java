@@ -171,7 +171,18 @@ public class BasicrunActivity extends Activity {
 		            return true;
 		        }
 		    });
+				
+			final Button button1 = (Button) findViewById(R.id.button1);
+			button1.setOnClickListener(new OnClickListener() {
+					@Override
+					public void onClick(View v) {
+						List<String> locations = db.getAllLocations();
 						
+						for(int i=0;i<locations.size();i++){
+							Log.v(TAG, locations.get(i));
+						}
+					}
+			});
 		}
 		
 		

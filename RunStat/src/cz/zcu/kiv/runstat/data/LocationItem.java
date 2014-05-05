@@ -25,17 +25,14 @@
 
 package cz.zcu.kiv.runstat.data;
 
-import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 
-import android.content.Context;
-
 
 public class LocationItem {
 	
-		public String locationTime;
+		public String timeDate;
 		public String locationDescription;
 		
 		public long id;
@@ -44,20 +41,33 @@ public class LocationItem {
 		public long time;
 		public int steps;
 		public float speed;
+		public float avgSpeed;
 		public float distance;
 		public double lat;
 		public double lng;
 		
 		
-		public LocationItem(long time, String description, long runID, double lat, double lng, Context ctx) throws IOException{
-			this.locationTime = convertToDateFormat(time);
-			this.locationDescription = description;
+		/*
+		 * Constructor for HistoryActivity
+		 */
+		public LocationItem(long runID, int run_type, long startTime, long endTime, int steps, float avgSpeed, float maxSpeed, float distance, double lat, double lng){		
 			
 			this.runID = runID;
+			this.runType = run_type;
+			this.locationDescription = ""; //unimplemented
+			this.timeDate = convertToDateFormat(startTime);
+			this.steps = steps;
+			this.speed = Math.round(maxSpeed * 3.6);
+			this.avgSpeed = Math.round(avgSpeed * 3.6);
+			this.distance = Math.round(distance);			
 			this.lat = lat;
 			this.lng = lng;					
 		}
 		
+		
+		/*
+		 * Constructor for DbSync
+		 */
 		public LocationItem(long id, long run_id, int run_type, long time, int steps, float speed, float distance, double lat, double lng){
 			this.id = id;
 			this.runID = run_id;
@@ -68,7 +78,7 @@ public class LocationItem {
 			this.distance = distance;
 			this.lat = lat;
 			this.lng = lng;	
-			this.locationTime = convertToDateFormatDB(time);
+			this.timeDate = convertToDateFormatDB(time);
 		}
 		
 		private String convertToDateFormat(long timeInMills){
@@ -92,4 +102,5 @@ public class LocationItem {
 			
 			return time;
 		}
+		
 }

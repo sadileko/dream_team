@@ -50,13 +50,14 @@ public class DBHelper extends SQLiteOpenHelper {
 
 	// Columns
 	public static final String TIME = "time";
-	public static final String LONGITUDE = "longitude";
+	public static final String LONGITUDE = "longtitude";
 	public static final String LATITUDE = "latitude";
 	public static final String STEPS = "steps";
 	public static final String SPEED = "speed";
 	public static final String DISTANCE = "distance";
 	public static final String TYPE = "type";			//Typ bìhu, 0 - zakladni, 1 - distancni, 2 - casovy
 	public static final String RUN_ID = "run_id";	//Id bìhu
+	public static final String SYNC = "sync";
 	
 	private long lastRowID = 1;
 	private Context ctx;
@@ -72,7 +73,7 @@ public class DBHelper extends SQLiteOpenHelper {
 	public void onCreate(SQLiteDatabase db) {
 		
 		String sql = "create table " + TABLE + "( " + BaseColumns._ID
-				+ " integer primary key autoincrement, " + RUN_ID + " integer," + TYPE + " integer," + TIME + " integer, "
+				+ " integer primary key autoincrement, " + RUN_ID + " integer," + TYPE + " integer,"+ SYNC + " integer," + TIME + " integer, "
 				+ STEPS + " integer, "+ SPEED +" text,"+ DISTANCE+ " text," + LATITUDE + " text, " + LONGITUDE + " text);";
 		
 		db.execSQL(sql);
@@ -102,6 +103,7 @@ public class DBHelper extends SQLiteOpenHelper {
 		
 		values.put(RUN_ID, lastRowID);
 		values.put(TYPE, type);
+		values.put(SYNC, 0);
 		values.put(TIME, System.currentTimeMillis());
 		values.put(STEPS, steps);
 		values.put(SPEED, speed);
@@ -151,30 +153,32 @@ public class DBHelper extends SQLiteOpenHelper {
 	
 	
 	/*
-	 * Get all running events
+	 * Get all running events for history
 	 */
 	public List<LocationItem> getRunningEvents() throws IOException{
 			//removeSingleMarkerLocations();
 		
 			List<LocationItem> locationsList = new ArrayList<LocationItem>();
-	        String selectQuery = "SELECT  * FROM " + TABLE;
+	        String selectQuery = "SELECT _id, run_id, type, MIN(time), MAX(time), MAX(steps), AVG(speed), MAX(speed), MAX(distance), latitude, longtitude FROM "+TABLE+" GROUP BY run_id";
 	 
 	        SQLiteDatabase db = this.getWritableDatabase();
 	        Cursor cursor = db.rawQuery(selectQuery, null);
 	        
-	        long runID = 0;
-	        long temp = 0;
 	                
 	        if (cursor.moveToFirst()) {
 	            do {
-	            	runID = cursor.getLong(1);
-	            	
-	            	if(runID != temp || cursor.getPosition() == 0){
-	            		locationsList.add(new LocationItem(cursor.getLong(3), "", runID, cursor.getDouble(7), cursor.getDouble(8), ctx));
-	            	}
-	            	
-	            	temp = runID;
-	            	
+	            	locationsList.add( new LocationItem(
+	            			cursor.getLong(1),
+	            			cursor.getInt(2),
+	            			cursor.getLong(3),
+	            			cursor.getLong(4),
+	            			cursor.getInt(5),
+	            			cursor.getFloat(6),
+	            			cursor.getFloat(7),
+	            			cursor.getFloat(8),
+	            			cursor.getDouble(9),
+	            			cursor.getDouble(10)
+	            			));	            	
 	            } while (cursor.moveToNext());
 	        }
 	        
@@ -195,12 +199,12 @@ public class DBHelper extends SQLiteOpenHelper {
             			cursor.getLong(0),
             			cursor.getLong(1),
             			cursor.getInt(2),
-            			cursor.getLong(3),
-            			cursor.getInt(4),
-            			cursor.getFloat(5),
+            			cursor.getLong(4),
+            			cursor.getInt(5),
             			cursor.getFloat(6),
-            			cursor.getDouble(7),
-            			cursor.getDouble(8)
+            			cursor.getFloat(7),
+            			cursor.getDouble(8),
+            			cursor.getDouble(9)
             			));
             	
             } while (cursor.moveToNext());
@@ -226,7 +230,7 @@ public class DBHelper extends SQLiteOpenHelper {
             do {
             	String location = "";
             	
-            	for(int i=0;i<9;i++)
+            	for(int i=0;i<10;i++)
             		location += cursor.getString(i)+"|";
 
             	locationList.add(location);

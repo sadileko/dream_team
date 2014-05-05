@@ -26,55 +26,18 @@
 package cz.zcu.kiv.runstat.ui;
 
 import cz.zcu.kiv.runstat.R;
-import android.app.Activity;
-import android.content.Intent;
 import android.os.Bundle;
-import android.view.Menu;
-import android.view.MenuItem;
-import android.view.View;
-import android.view.View.OnClickListener;
-import android.widget.Button;
+import android.preference.PreferenceFragment;
 
-public class SettingsActivity extends Activity {
-	
+public class SettingsFragment extends PreferenceFragment {
+
 	@Override
-	protected void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
-		
-		// Display the fragment as the main content.
-        getFragmentManager().beginTransaction()
-                .replace(android.R.id.content, new SettingsFragment())
-                .commit();
-		
-	}
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        // Load the preferences from an XML resource
+        addPreferencesFromResource(R.xml.preferences);
+    }
+
 	
-	
-	@Override
-	public void onDestroy(){
-		super.onDestroy();
-		
-	}
-	
-	@Override
-	public boolean onCreateOptionsMenu(Menu menu) {
-		// Inflate the menu; this adds items to the action bar if it is present.
-		getMenuInflater().inflate(R.menu.main, menu);
-		return true;
-	}	
-	
-	@Override
-	public boolean onOptionsItemSelected(MenuItem item) {
-	    // Handle item selection
-	    switch (item.getItemId()) {
-	    case R.id.action_settings:
-	    	//*
-	        return true;
-	    case R.id.action_help:
-	    	Intent intent1 = new Intent(this, MainActivity.class); 
-	    	startActivity(intent1);
-	        return true;
-	    default:
-	        return super.onOptionsItemSelected(item);
-	    }
-	}
 }

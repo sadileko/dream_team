@@ -71,7 +71,7 @@ public class MapActivity extends Activity {
         
         map = ((MapFragment) getFragmentManager().findFragmentById(R.id.map)).getMap();
 
-        //Load locaitons with specific run_id from DB
+        //Load locations with specific run_id from DB
         Cursor cursor = dbh.getLocationsByRunId(runID);
         
     	setMarkers(cursor, 0);
@@ -92,16 +92,16 @@ public class MapActivity extends Activity {
 		while (cursor.moveToNext()) {
 
 			long id = cursor.getLong(0);
-			long timeMils = cursor.getLong(3);
+			long timeMils = cursor.getLong(4);
 			//int steps = cursor.getInt(4);		Unused, for now
 			
 			//Convert speed to km/h and round
-			float speed = cursor.getFloat(5);
+			float speed = cursor.getFloat(6);
 			float roundedSpeed = (float)Math.round(speed * 36) / 10;
 			
-			float distance = cursor.getFloat(6);
-			double latitude = cursor.getDouble(7);
-			double longitude = cursor.getDouble(8);			
+			float distance = cursor.getFloat(7);
+			double latitude = cursor.getDouble(8);
+			double longitude = cursor.getDouble(9);			
 			
 			SimpleDateFormat sdf = new SimpleDateFormat("HH:mm, dd.MMM.yyyy", locale);
 			

@@ -1,3 +1,28 @@
+/***********************************************************************************************************************
+ *
+ * This file is part of the ${PROJECT_NAME} project
+
+ * ==========================================
+ *
+ * Copyright (C) ${YEAR} by University of West Bohemia (http://www.zcu.cz/en/)
+ *
+ ***********************************************************************************************************************
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
+ * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations under the License.
+ *
+ ***********************************************************************************************************************
+ *
+ * ${NAME}, ${YEAR}/${MONTH}/${DAY} ${HOUR}:${MINUTE} ${USER}
+ *
+ **********************************************************************************************************************/
+
 package cz.zcu.kiv.runstat.ui;
 
 import java.io.IOException;
@@ -90,7 +115,7 @@ public class HistoryActivity extends Activity {
         	    	    	locationListAdapter.remove(positionToRemove);
         	    	    	locationListAdapter.notifyDataSetChanged();  
         	    	    	
-        	    	    	Toast.makeText(getApplicationContext(), "Record from " + item.locationTime + " was deleted.", Toast.LENGTH_LONG).show(); 
+        	    	    	Toast.makeText(getApplicationContext(), "Record from " + item.timeDate + " was deleted.", Toast.LENGTH_LONG).show(); 
         	    	    }
         	    	})
         	    	.setNegativeButton("No", null);
@@ -145,13 +170,21 @@ public class HistoryActivity extends Activity {
 				arg1 = inflater.inflate(R.layout.listitem, arg2,false);
 			}
 			
-			TextView chapterName = (TextView)arg1.findViewById(R.id.textView1);
-			TextView chapterDesc = (TextView)arg1.findViewById(R.id.textView2);
+			TextView locationName = (TextView)arg1.findViewById(R.id.txtName);
+			TextView locationDesc = (TextView)arg1.findViewById(R.id.txtLocation);
+			TextView locationDistance = (TextView)arg1.findViewById(R.id.txtHistoryDistance);
+			TextView locationAvgSpeed = (TextView)arg1.findViewById(R.id.txtHistoryAvgSpeed);
+			TextView locationMaxSpeed = (TextView)arg1.findViewById(R.id.txtHistoryMaxSpeed);
+			TextView locationDuration = (TextView)arg1.findViewById(R.id.txtHistoryDuration);
 			
 			LocationItem locItem = locationList.get(arg0);
 			
-			chapterName.setText(locItem.locationTime);
-			chapterDesc.setText("run_id:"+locItem.runID);
+			locationName.setText(locItem.timeDate);
+			locationDesc.setText("run_id: "+locItem.runID);
+			locationDistance.setText("Distance: "+locItem.distance+" m");
+			locationAvgSpeed.setText("Average speed: "+locItem.avgSpeed+" km/h");
+			locationMaxSpeed.setText("Max. speed: "+locItem.speed+" km/h");
+			locationDuration.setText(" "+locItem.locationDescription);
 			
 			return arg1;
 		}

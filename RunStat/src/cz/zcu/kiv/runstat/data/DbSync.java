@@ -107,7 +107,7 @@ private class postOperation extends AsyncTask<String, Void, String> {
         		insert(
         				locations.get(i).runID,
         				locations.get(i).runType,
-        				locations.get(i).locationTime,
+        				locations.get(i).timeDate,
         				locations.get(i).steps,
         				locations.get(i).speed,
         				locations.get(i).distance,
@@ -151,14 +151,14 @@ private class postOperation extends AsyncTask<String, Void, String> {
         	nameValuePairs.add(new BasicNameValuePair("steps", strSteps));
         	nameValuePairs.add(new BasicNameValuePair("speed", strSpeed));
         	nameValuePairs.add(new BasicNameValuePair("distance", strDistance));
-        	nameValuePairs.add(new BasicNameValuePair("lng", strLat));
-        	nameValuePairs.add(new BasicNameValuePair("lat", strLng));
+        	nameValuePairs.add(new BasicNameValuePair("lat", strLat));
+        	nameValuePairs.add(new BasicNameValuePair("lng", strLng));
 
         	try
         	{
         		
         		HttpClient httpclient = new DefaultHttpClient();
-    	        HttpPost httppost = new HttpPost("http://tomasbouda.cz/zswi/dbHandler/insert.php");
+    	        HttpPost httppost = new HttpPost("http://runstat.hostuju.cz/insert.php");
     	        
     	        httppost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
     	        HttpResponse response = httpclient.execute(httppost); 

@@ -24,7 +24,7 @@
             android:textSize="80sp" />
 
         <TextView
-            android:id="@+id/textView2"
+            android:id="@+id/txtLocation"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_below="@+id/txtCurrentSpeed"
@@ -37,7 +37,7 @@
             android:id="@+id/txtDistance"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@+id/textView2"
+            android:layout_below="@+id/txtLocation"
             android:layout_centerHorizontal="true"
             android:layout_marginTop="14dp"
             android:text="@string/strDistanceDone"
@@ -76,7 +76,7 @@
         android:layout_alignParentTop="true" >
 
         <TextView
-            android:id="@+id/textView1"
+            android:id="@+id/txtName"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentLeft="true"
@@ -116,5 +116,13 @@
         android:layout_toRightOf="@+id/chckLocated"
         android:text="@string/strProvider"
         android:textSize="10sp" />
+
+    <Button
+        android:id="@+id/button1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_below="@+id/relativeLayout2"
+        android:text="Button" />
 
 </RelativeLayout>

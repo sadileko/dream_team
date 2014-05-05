@@ -31,5 +31,11 @@
     <string name="strProvider">Provider:</string>
     <string name="strSynchronize">Synchronize</string>
     <string name="strBtnSync">Synchronize locations</string>
+    <string name="pref_sms_storage_title">TODO</string>
+    <string name="pref_summary_auto_delete">TODO</string>
+    <string name="pref_title_auto_delete">TODO</string>
+    <string name="pref_summary_delete_limit">TODO</string>
+    <string name="pref_title_sms_delete">TODO</string>
+    <string name="pref_title_mms_delete">TODO</string>
 
 </resources>
