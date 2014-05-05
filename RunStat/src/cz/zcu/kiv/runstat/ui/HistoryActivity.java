@@ -1,7 +1,6 @@
 package cz.zcu.kiv.runstat.ui;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
 import cz.zcu.kiv.runstat.R;

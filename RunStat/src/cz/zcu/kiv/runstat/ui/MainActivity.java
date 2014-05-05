@@ -26,6 +26,7 @@
 package cz.zcu.kiv.runstat.ui;
 
 import cz.zcu.kiv.runstat.R;
+import cz.zcu.kiv.runstat.data.DbSync;
 import android.os.Bundle;
 import android.app.Activity;
 import android.content.Intent;
@@ -73,6 +74,18 @@ public class MainActivity extends Activity{
 					Log.i(TAG, "History");
 
 					Intent intent = new Intent(MainActivity.this, HistoryActivity.class); 
+					startActivityForResult(intent, 0);
+										
+				}
+		});
+		
+		final Button button1 = (Button) findViewById(R.id.btnSync);
+		button1.setOnClickListener(new OnClickListener() {
+				@Override
+				public void onClick(View v) {
+					Log.i(TAG, "DBSync");
+
+					Intent intent = new Intent(MainActivity.this, DbSync.class); 
 					startActivityForResult(intent, 0);
 										
 				}

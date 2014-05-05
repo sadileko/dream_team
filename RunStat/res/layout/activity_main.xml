@@ -29,6 +29,22 @@
             android:layout_marginTop="42dp"
             android:text="@string/strHistory" />
 
+        <Button
+            android:id="@+id/btnSync"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="42dp"
+            android:text="@string/strBtnSync" />
+
     </LinearLayout>
+
+    <ImageView
+        android:id="@+id/imageView1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/linearLayout1"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="17dp"
+        android:src="@drawable/run" />
 
 </RelativeLayout>

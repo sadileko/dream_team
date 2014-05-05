@@ -181,6 +181,34 @@ public class DBHelper extends SQLiteOpenHelper {
 	        return locationsList;
 	}
 	
+	public List<LocationItem> getAllLocationsAsList(){
+		List<LocationItem> locationsList = new ArrayList<LocationItem>();
+        String selectQuery = "SELECT  * FROM " + TABLE;
+ 
+        SQLiteDatabase db = this.getWritableDatabase();
+        Cursor cursor = db.rawQuery(selectQuery, null);
+	
+        if (cursor.moveToFirst()) {
+            do {
+            	
+            	locationsList.add(new LocationItem(
+            			cursor.getLong(0),
+            			cursor.getLong(1),
+            			cursor.getInt(2),
+            			cursor.getLong(3),
+            			cursor.getInt(4),
+            			cursor.getFloat(5),
+            			cursor.getFloat(6),
+            			cursor.getDouble(7),
+            			cursor.getDouble(8)
+            			));
+            	
+            } while (cursor.moveToNext());
+        }
+        
+        return locationsList;
+	}
+	
 	
 	/*
 	 * Returns all locations from DB as list of strings
@@ -241,18 +269,22 @@ public class DBHelper extends SQLiteOpenHelper {
         SQLiteDatabase db = this.getWritableDatabase();
         Cursor cursor = db.rawQuery(selectQuery, null);
         
+        String where ="run_id=?";
+        String[] params;
+        
         List<location> locList = new ArrayList<location>();
         long runIDprev = 0;
         long runID = 0;
         long count = 0;
+        int oneRowCount = 0;
         
         if (cursor.moveToFirst()) {
             do {
             	runID = cursor.getLong(1);
             	
             	if(runID!=runIDprev){
-            		location loc = new location(runID,count);
-            		locList.add(loc);
+            		locList.add(new location(runID, count));
+            		oneRowCount++;
             		count = 1;
             	}
             	else{
@@ -264,29 +296,15 @@ public class DBHelper extends SQLiteOpenHelper {
             } while (cursor.moveToNext());
         }
         
-        String deleteQuery = "DELETE FROM "+ TABLE + " WHERE ";
-        boolean isFirst = true;
-        int countDel = 0;
+        params = new String[oneRowCount];
         
         for(int i=0; i<locList.size();i++){
         	if(locList.get(i).count <=1){
-        		if(isFirst){
-        			deleteQuery += "run_id="+locList.get(i).runID;
-        			isFirst = false;
-        			countDel++;
-        		}
-        		else{
-        			deleteQuery += " OR run_id="+ locList.get(i).runID;
-        			countDel++;
-        		}
-        		
+        		params[i] = String.valueOf(locList.get(i).runID);
         	}
         }
-         
-        if(countDel > 0){
-        	db.execSQL(deleteQuery, null);
-        	Log.i(TAG, countDel + " records was deleted");
-        }
+
+        db.delete(TABLE, where, params);
 	}
 	
 	

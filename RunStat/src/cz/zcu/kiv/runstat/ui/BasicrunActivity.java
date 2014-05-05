@@ -76,7 +76,6 @@ public class BasicrunActivity extends Activity {
 		private TextView txtDistance;
 		private CheckBox chckLocated;
 		private TextView  txtProvider;
-		private TextView txtRunID;
 		
 		
 		/*
@@ -97,7 +96,6 @@ public class BasicrunActivity extends Activity {
 			txtDistance = (TextView) findViewById(R.id.txtDistance);
 			txtProvider = (TextView) findViewById(R.id.txtProvider);			
 			chckLocated = (CheckBox) findViewById(R.id.chckLocated);							
-			txtRunID = (TextView) findViewById(R.id.txtRunID);
 			
 			// Instance for debuging - removing locations and write to log
 			final DBHelper db = new DBHelper(getApplicationContext());
@@ -164,41 +162,16 @@ public class BasicrunActivity extends Activity {
 		        @Override
 		        public boolean onLongClick(View v){    
 		        	//Show MAP
+		        	/*
 		        	Toast.makeText(getApplicationContext(), "Starting Google maps", Toast.LENGTH_SHORT).show();
 		        	
 		        	Intent intent = new Intent(BasicrunActivity.this, MapActivity.class); 
-		        	intent.putExtra("runID", Integer.parseInt(txtRunID.getText().toString()) );
 					startActivity(intent);	
-
+		        	 */
 		            return true;
 		        }
 		    });
-			
-			//DEBUG
-			
-			final Button button1 = (Button) findViewById(R.id.button1);
-			button1.setOnClickListener(new OnClickListener() {
-					@Override
-					public void onClick(View v) {
-						List<String> locations = db.getAllLocations();      
-				         
-				        for (int i =0; i<locations.size();i++) {
-				            String log = "From DB:" + locations.get(i);
-				            Log.v("TAG ", log);										
-				        }
-					}
-			});
-			
-			final Button button2 = (Button) findViewById(R.id.button2);
-			button2.setOnClickListener(new OnClickListener() {
-					@Override
-					public void onClick(View v) {
-						//db.removeAllLocations();
-						//db.removeSingleMarkerLocations();
-						db.removeLocationByRunID( Long.parseLong( txtRunID.getText().toString() ) );
-					}
-			});
-			
+						
 		}
 		
 		

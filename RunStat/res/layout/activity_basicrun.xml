@@ -96,27 +96,6 @@
             android:src="@android:drawable/ic_menu_help" />
     </RelativeLayout>
 
-    <Button
-        android:id="@+id/button1"
-        style="?android:attr/buttonStyleSmall"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
-        android:layout_alignRight="@+id/button2"
-        android:layout_below="@+id/relativeLayout2"
-        android:text="$LogDB"
-        android:textSize="10sp" />
-
-    <Button
-        android:id="@+id/button2"
-        style="?android:attr/buttonStyleSmall"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
-        android:layout_below="@+id/button1"
-        android:text="$ClearDB"
-        android:textSize="10sp" />
-
     <CheckBox
         android:id="@+id/chckLocated"
         android:layout_width="wrap_content"
@@ -133,18 +112,9 @@
         android:layout_height="wrap_content"
         android:layout_alignBaseline="@+id/chckLocated"
         android:layout_alignBottom="@+id/chckLocated"
-        android:layout_marginLeft="18dp"
-        android:layout_toRightOf="@+id/button2"
+        android:layout_marginLeft="19dp"
+        android:layout_toRightOf="@+id/chckLocated"
         android:text="@string/strProvider"
         android:textSize="10sp" />
-
-    <EditText
-        android:id="@+id/txtRunID"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignRight="@+id/txtProvider"
-        android:layout_alignTop="@+id/button1"
-        android:layout_toRightOf="@+id/chckLocated"
-        android:ems="10" />
 
 </RelativeLayout>
