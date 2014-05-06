@@ -159,15 +159,15 @@ public class DBHelper extends SQLiteOpenHelper {
 			//removeSingleMarkerLocations();
 		
 			List<LocationItem> locationsList = new ArrayList<LocationItem>();
-	        String selectQuery = "SELECT _id, run_id, type, MIN(time), MAX(time), MAX(steps), AVG(speed), MAX(speed), MAX(distance), latitude, longtitude FROM "+TABLE+" GROUP BY run_id";
+	        String selectQuery = "SELECT MIN(sync), run_id, type, MIN(time), MAX(time), MAX(steps), AVG(speed), MAX(speed), MAX(distance), latitude, longtitude FROM "+TABLE+" GROUP BY run_id";
 	 
 	        SQLiteDatabase db = this.getWritableDatabase();
 	        Cursor cursor = db.rawQuery(selectQuery, null);
-	        
-	                
+	        	                
 	        if (cursor.moveToFirst()) {
 	            do {
 	            	locationsList.add( new LocationItem(
+	            			cursor.getInt(0),
 	            			cursor.getLong(1),
 	            			cursor.getInt(2),
 	            			cursor.getLong(3),
@@ -185,9 +185,15 @@ public class DBHelper extends SQLiteOpenHelper {
 	        return locationsList;
 	}
 	
+	
+	/*
+	 * 
+	 */
 	public List<LocationItem> getAllLocationsAsList(){
+		removeSingleMarkerLocations();	//clean up DB before synchronize
+		
 		List<LocationItem> locationsList = new ArrayList<LocationItem>();
-        String selectQuery = "SELECT  * FROM " + TABLE;
+        String selectQuery = "SELECT  * FROM " + TABLE + " WHERE sync=0";
  
         SQLiteDatabase db = this.getWritableDatabase();
         Cursor cursor = db.rawQuery(selectQuery, null);
@@ -210,12 +216,15 @@ public class DBHelper extends SQLiteOpenHelper {
             } while (cursor.moveToNext());
         }
         
+        selectQuery = "UPDATE "+TABLE+" SET sync='1' WHERE sync='0'";
+        db.execSQL(selectQuery);
+        
         return locationsList;
 	}
 	
 	
 	/*
-	 * Returns all locations from DB as list of strings
+	 * Returns all locations from DB as list of strings - for log
 	 */
 	public List<String> getAllLocations() {
         List<String> locationList = new ArrayList<String>();
@@ -247,7 +256,7 @@ public class DBHelper extends SQLiteOpenHelper {
 	 * Removes all locations in DB
 	 */
 	public void removeAllLocations(){
-		SQLiteDatabase db = this.getWritableDatabase(); // helper is object extends SQLiteOpenHelper
+		SQLiteDatabase db = this.getWritableDatabase();
 	    db.delete(TABLE, null, null);
 	}
 	
@@ -268,58 +277,25 @@ public class DBHelper extends SQLiteOpenHelper {
 	 * Removes locations where is only one/two markers
 	 */
 	public void removeSingleMarkerLocations(){
-		String selectQuery = "SELECT  * FROM " + TABLE;
-		 
+		String selectQuery = "SELECT run_id FROM "+TABLE+" GROUP BY run_id HAVING COUNT(*)=1";
+		String deleteQuery = "DELETE FROM "+TABLE+" WHERE "; 
+
         SQLiteDatabase db = this.getWritableDatabase();
         Cursor cursor = db.rawQuery(selectQuery, null);
         
-        String where ="run_id=?";
-        String[] params;
-        
-        List<location> locList = new ArrayList<location>();
-        long runIDprev = 0;
-        long runID = 0;
-        long count = 0;
-        int oneRowCount = 0;
-        
         if (cursor.moveToFirst()) {
             do {
-            	runID = cursor.getLong(1);
-            	
-            	if(runID!=runIDprev){
-            		locList.add(new location(runID, count));
-            		oneRowCount++;
-            		count = 1;
+            	if(cursor.isLast()){
+            		deleteQuery += "run_id='" + cursor.getLong(0) + "'";
+            	}else{
+            		deleteQuery += "run_id='" + cursor.getLong(0) + "' OR ";
             	}
-            	else{
-            		count++;
-            	}
-            	
-            	runIDprev = runID;
-            	
             } while (cursor.moveToNext());
         }
         
-        params = new String[oneRowCount];
-        
-        for(int i=0; i<locList.size();i++){
-        	if(locList.get(i).count <=1){
-        		params[i] = String.valueOf(locList.get(i).runID);
-        	}
-        }
 
-        db.delete(TABLE, where, params);
+        db.execSQL(deleteQuery);
+        db.close();
 	}
-	
-	
-	private class location{
-		
-		public long runID;
-		public long count;
-		
-		public location(long runID, long count){
-			this.runID = runID;
-			this.count = count;
-		}
-	}
+
 }

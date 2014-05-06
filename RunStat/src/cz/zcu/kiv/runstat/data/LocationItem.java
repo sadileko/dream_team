@@ -45,12 +45,13 @@ public class LocationItem {
 		public float distance;
 		public double lat;
 		public double lng;
+		public boolean synchronyzed;
 		
 		
 		/*
 		 * Constructor for HistoryActivity
 		 */
-		public LocationItem(long runID, int run_type, long startTime, long endTime, int steps, float avgSpeed, float maxSpeed, float distance, double lat, double lng){		
+		public LocationItem(int synced, long runID, int run_type, long startTime, long endTime, int steps, float avgSpeed, float maxSpeed, float distance, double lat, double lng){		
 			
 			this.runID = runID;
 			this.runType = run_type;
@@ -61,7 +62,12 @@ public class LocationItem {
 			this.avgSpeed = Math.round(avgSpeed * 3.6);
 			this.distance = Math.round(distance);			
 			this.lat = lat;
-			this.lng = lng;					
+			this.lng = lng;	
+			
+			if(synced == 1)
+				this.synchronyzed = true; 
+			else
+				this.synchronyzed = false;
 		}
 		
 		

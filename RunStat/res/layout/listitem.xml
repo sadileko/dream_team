@@ -1,7 +1,6 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
-    android:layout_height="wrap_content"
-     >
+    android:layout_height="wrap_content" >
 
     <ImageView
         android:id="@+id/imageView1"
@@ -66,5 +65,15 @@
         android:layout_below="@+id/txtHistoryMaxSpeed"
         android:text="Small Text"
         android:textAppearance="?android:attr/textAppearanceSmall" />
+
+    <ImageView
+        android:id="@+id/imgSynced"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/txtLocation"
+        android:layout_alignParentRight="true"
+        android:layout_marginRight="14dp"
+        android:src="@drawable/synced"
+        android:visibility="invisible" />
 
 </RelativeLayout> 

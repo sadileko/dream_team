@@ -37,6 +37,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -44,6 +45,8 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.BaseAdapter;
+import android.widget.CheckBox;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -176,15 +179,24 @@ public class HistoryActivity extends Activity {
 			TextView locationAvgSpeed = (TextView)arg1.findViewById(R.id.txtHistoryAvgSpeed);
 			TextView locationMaxSpeed = (TextView)arg1.findViewById(R.id.txtHistoryMaxSpeed);
 			TextView locationDuration = (TextView)arg1.findViewById(R.id.txtHistoryDuration);
+			ImageView synced = (ImageView)arg1.findViewById(R.id.imgSynced);
 			
 			LocationItem locItem = locationList.get(arg0);
-			
+			Log.d("List", locationList.get(arg0).runID+" | "+ arg0 + " | "+ locationList.get(arg0).synchronyzed);
 			locationName.setText(locItem.timeDate);
 			locationDesc.setText("run_id: "+locItem.runID);
 			locationDistance.setText("Distance: "+locItem.distance+" m");
 			locationAvgSpeed.setText("Average speed: "+locItem.avgSpeed+" km/h");
 			locationMaxSpeed.setText("Max. speed: "+locItem.speed+" km/h");
 			locationDuration.setText(" "+locItem.locationDescription);
+			
+			if(locItem.synchronyzed){
+				synced.setVisibility(synced.VISIBLE);
+			}else
+			{
+				synced.setVisibility(synced.INVISIBLE);
+			}
+			
 			
 			return arg1;
 		}

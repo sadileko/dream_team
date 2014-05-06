@@ -171,7 +171,13 @@ public class BasicrunActivity extends Activity {
 		            return true;
 		        }
 		    });
-				
+			
+			
+			/*
+			 * DEBUG
+			 */
+			
+			/*	
 			final Button button1 = (Button) findViewById(R.id.button1);
 			button1.setOnClickListener(new OnClickListener() {
 					@Override
@@ -181,8 +187,12 @@ public class BasicrunActivity extends Activity {
 						for(int i=0;i<locations.size();i++){
 							Log.v(TAG, locations.get(i));
 						}
+						
+						db.removeSingleMarkerLocations();
+						
 					}
 			});
+			*/
 		}
 		
 		
