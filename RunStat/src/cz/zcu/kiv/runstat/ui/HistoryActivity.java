@@ -182,7 +182,7 @@ public class HistoryActivity extends Activity {
 			ImageView synced = (ImageView)arg1.findViewById(R.id.imgSynced);
 			
 			LocationItem locItem = locationList.get(arg0);
-			Log.d("List", locationList.get(arg0).runID+" | "+ arg0 + " | "+ locationList.get(arg0).synchronyzed);
+
 			locationName.setText(locItem.timeDate);
 			locationDesc.setText("run_id: "+locItem.runID);
 			locationDistance.setText("Distance: "+locItem.distance+" m");

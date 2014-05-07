@@ -156,7 +156,7 @@ public class DBHelper extends SQLiteOpenHelper {
 	 * Get all running events for history
 	 */
 	public List<LocationItem> getRunningEvents() throws IOException{
-			//removeSingleMarkerLocations();
+			removeSingleMarkerLocations();
 		
 			List<LocationItem> locationsList = new ArrayList<LocationItem>();
 	        String selectQuery = "SELECT MIN(sync), run_id, type, MIN(time), MAX(time), MAX(steps), AVG(speed), MAX(speed), MAX(distance), latitude, longtitude FROM "+TABLE+" GROUP BY run_id";
@@ -274,7 +274,7 @@ public class DBHelper extends SQLiteOpenHelper {
 	
 	
 	/*
-	 * Removes locations where is only one/two markers
+	 * Removes locations where is only one marker
 	 */
 	public void removeSingleMarkerLocations(){
 		String selectQuery = "SELECT run_id FROM "+TABLE+" GROUP BY run_id HAVING COUNT(*)=1";
@@ -283,18 +283,21 @@ public class DBHelper extends SQLiteOpenHelper {
         SQLiteDatabase db = this.getWritableDatabase();
         Cursor cursor = db.rawQuery(selectQuery, null);
         
-        if (cursor.moveToFirst()) {
-            do {
-            	if(cursor.isLast()){
-            		deleteQuery += "run_id='" + cursor.getLong(0) + "'";
-            	}else{
-            		deleteQuery += "run_id='" + cursor.getLong(0) + "' OR ";
-            	}
-            } while (cursor.moveToNext());
+        if(cursor.getCount()>0){
+        	
+        	if (cursor.moveToFirst()) {
+        	   do {
+        		   if(cursor.isLast()){
+        			   deleteQuery += "run_id='" + cursor.getLong(0) + "'";
+        		   }else{
+        			   deleteQuery += "run_id='" + cursor.getLong(0) + "' OR ";
+        		   }
+        	   } while (cursor.moveToNext());
+        	}
+        	
+        	db.execSQL(deleteQuery);
         }
-        
-
-        db.execSQL(deleteQuery);
+  
         db.close();
 	}
 
