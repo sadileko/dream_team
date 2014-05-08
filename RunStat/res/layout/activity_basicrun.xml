@@ -51,6 +51,7 @@
             android:layout_below="@+id/txtDistance"
             android:layout_centerHorizontal="true"
             android:text="@string/strSteps" />
+
     </RelativeLayout>
 
     <LinearLayout
@@ -104,7 +105,8 @@
         android:layout_alignParentLeft="true"
         android:clickable="false"
         android:text="@string/strLocated"
-        android:textSize="10sp" />
+        android:textSize="10sp"
+        android:visibility="invisible" />
 
     <TextView
         android:id="@+id/txtProvider"
@@ -116,5 +118,15 @@
         android:layout_toRightOf="@+id/chckLocated"
         android:text="@string/strProvider"
         android:textSize="10sp" />
+
+    <ProgressBar
+        android:id="@+id/pBar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/linearLayout2"
+        android:layout_alignParentLeft="true"
+        android:layout_marginLeft="10dp"
+        android:clickable="false"
+        android:visibility="visible" />
 
 </RelativeLayout>

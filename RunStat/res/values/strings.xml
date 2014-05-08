@@ -34,5 +34,9 @@
 	<string name="pref_general">General</string>
 	<string name="pref_title_usewifi">Use wifi provider</string>
 	<string name="pref_summary_usewifi">Use wifi provider for locating your running. This is unrecomended setting.</string>
+	<string name="menu_basic">Basic running</string>
+	<string name="menu_distance">Distance running</string>
+	<string name="menu_time">Time running</string>
+	<string name="menu_title">Select type</string>
 	
 </resources>

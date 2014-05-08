@@ -33,11 +33,16 @@ import android.os.Bundle;
 import android.app.Activity;
 import android.content.Intent;
 import android.util.Log;
+import android.view.ContextMenu;
+import android.view.ContextMenu.ContextMenuInfo;
 import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.Button;
+import android.widget.Toast;
 
 
 public class MainActivity extends Activity{
@@ -64,8 +69,10 @@ public class MainActivity extends Activity{
 				@Override
 				public void onClick(View v) {
 					Log.i(TAG, "Start");
-					Intent intent = new Intent(MainActivity.this, BasicrunActivity.class); 
-					startActivityForResult(intent, 0);										
+
+				    registerForContextMenu(v); 
+				    openContextMenu(v);
+				    unregisterForContextMenu(v);
 				}
 		});
 		
@@ -98,6 +105,33 @@ public class MainActivity extends Activity{
 				}
 		});
 		
+	}
+	
+	@Override
+	public void onCreateContextMenu(ContextMenu menu, View v,
+	                                ContextMenuInfo menuInfo) {
+	    super.onCreateContextMenu(menu, v, menuInfo);
+	    MenuInflater inflater = getMenuInflater();
+	    inflater.inflate(R.menu.context_menu, menu);
+	}
+	
+	@Override
+	public boolean onContextItemSelected(MenuItem item) {
+	    AdapterContextMenuInfo info = (AdapterContextMenuInfo) item.getMenuInfo();
+	    switch (item.getItemId()) {
+	        case R.id.basic:
+	        	Intent intent = new Intent(MainActivity.this, BasicrunActivity.class); 
+				startActivityForResult(intent, 0);
+	            return true;
+	        case R.id.distance:
+	        	//
+	            return true;
+	        case R.id.time:
+	        	//
+	            return true;
+	        default:
+	            return super.onContextItemSelected(item);
+	    }
 	}
 	
 	

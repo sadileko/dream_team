@@ -36,8 +36,14 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
+import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.os.Handler;
+import android.preference.PreferenceManager;
+import android.provider.Settings;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -46,6 +52,7 @@ import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.ImageButton;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 
@@ -57,6 +64,9 @@ public class BasicrunActivity extends Activity {
 		//BroadcastReciever instance
 		private RServiceRequestReceiver receiver;
 		
+		WifiManager wifi;
+		SharedPreferences sharedPref;
+		
 		//Custom variables
 		public int steps = 0;
 		public double stepForce = 0.0;
@@ -65,6 +75,7 @@ public class BasicrunActivity extends Activity {
 		public float speed = 0;
 		public float distance = 0;
 		public String provider = "";
+		boolean settingsUseWifi;
 		
 		//View
 		private Handler myHandler;
@@ -73,7 +84,7 @@ public class BasicrunActivity extends Activity {
 		private TextView txtDistance;
 		private CheckBox chckLocated;
 		private TextView  txtProvider;
-		
+		private ProgressBar pBar;
 		
 		/*
 		 * Activity lifecycle
@@ -84,6 +95,8 @@ public class BasicrunActivity extends Activity {
 			super.onCreate(savedInstanceState);
 			setContentView(R.layout.activity_basicrun);
 			Log.d(TAG,"onCreate()");			
+				
+			sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
 			
 			/*
 			 * 	View
@@ -93,7 +106,8 @@ public class BasicrunActivity extends Activity {
 			txtDistance = (TextView) findViewById(R.id.txtDistance);
 			txtProvider = (TextView) findViewById(R.id.txtProvider);			
 			chckLocated = (CheckBox) findViewById(R.id.chckLocated);							
-
+			pBar = (ProgressBar) findViewById(R.id.pBar);
+			
 			//Handler for refreshing UI
 			myHandler = new Handler();
 			myHandler.post(stepsUpdate);
@@ -213,16 +227,30 @@ public class BasicrunActivity extends Activity {
 		private Runnable stepsUpdate = new Runnable() {
 			   public void run() {
 
-			       txtSteps.setText("(Aprox. " + steps + " steps)");
-			       
-			       //convert meters to km per hours and round the value
-			       float roundedSpeed= (float)Math.round(speed * 36) / 10;
-			       txtCurrentSpeed.setText("" + roundedSpeed);
-			       
-			       txtDistance.setText(""+ Math.round(distance) +" m");
-			       
-			       txtProvider.setText("Provider: " + provider);
-			       
+				   wifi = (WifiManager)getSystemService(Context.WIFI_SERVICE);
+				   settingsUseWifi = sharedPref.getBoolean("pref_key_usewifi", false);
+				   String settingsProvider = Settings.Secure.getString(getContentResolver(), Settings.Secure.LOCATION_PROVIDERS_ALLOWED);
+				   
+				   if(settingsProvider.contains("gps") || (wifi.isWifiEnabled() && settingsUseWifi)){
+					   
+					   if(settingsProvider.contains("gps"))
+						   settingsProvider = "gps";
+					   
+					   txtSteps.setText("(Aprox. " + steps + " steps)");
+				       
+				       //convert meters to km per hours and round the value
+				       float roundedSpeed= (float)Math.round(speed * 36) / 10;
+				       txtCurrentSpeed.setText("" + roundedSpeed);
+				       
+				       txtDistance.setText(""+ Math.round(distance) +" m");
+				       
+				       txtProvider.setText("Provider: " + settingsProvider); 
+				        
+				   }else
+				   {
+					   txtProvider.setText("Please turn GPS on, or turn wifi on and allow it in settings."); 
+				   }
+   				          			     
 			       myHandler.postDelayed(this, 250);
 			    }
 		};
@@ -245,8 +273,16 @@ public class BasicrunActivity extends Activity {
 	            distance = intent.getFloatExtra("DxDistance", 0);
 	            provider = intent.getStringExtra("DxProvider").toUpperCase(new Locale("cs", "CZ"));
 	            
-	            if(latitude!=0.0 && !chckLocated.isChecked())
+	            if(latitude!=0.0 || longtitude!=0.0){
+	            	pBar.setVisibility(View.INVISIBLE);
+	            	chckLocated.setVisibility(View.VISIBLE);
 	            	chckLocated.setChecked(true);
+	            }	            	
+	            else{
+	            	chckLocated.setVisibility(View.INVISIBLE);
+	            	pBar.setVisibility(View.VISIBLE);
+	            }
+	            	
 	        }
 		}
 	
