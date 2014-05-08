@@ -25,11 +25,10 @@
 
 package cz.zcu.kiv.runstat.ui;
 
-import java.util.List;
+import java.util.Locale;
 
 import cz.zcu.kiv.runstat.R;
-import cz.zcu.kiv.runstat.data.DBHelper;
-import cz.zcu.kiv.runstat.data.DynamixService;
+import cz.zcu.kiv.runstat.logic.DynamixService;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
@@ -44,12 +43,10 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.view.View.OnLongClickListener;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.ImageButton;
 import android.widget.TextView;
-import android.widget.Toast;
 
 
 public class BasicrunActivity extends Activity {
@@ -59,7 +56,7 @@ public class BasicrunActivity extends Activity {
 			
 		//BroadcastReciever instance
 		private RServiceRequestReceiver receiver;
-		 
+		
 		//Custom variables
 		public int steps = 0;
 		public double stepForce = 0.0;
@@ -96,9 +93,6 @@ public class BasicrunActivity extends Activity {
 			txtDistance = (TextView) findViewById(R.id.txtDistance);
 			txtProvider = (TextView) findViewById(R.id.txtProvider);			
 			chckLocated = (CheckBox) findViewById(R.id.chckLocated);							
-			
-			// Instance for debuging - removing locations and write to log
-			final DBHelper db = new DBHelper(getApplicationContext());
 
 			//Handler for refreshing UI
 			myHandler = new Handler();
@@ -152,47 +146,7 @@ public class BasicrunActivity extends Activity {
 						startActivityForResult(intent, 0);									
 					}
 			});
-			
-			/*
-			 * TextViews
-			 */
-			
-			//Current speed long click listener
-			txtCurrentSpeed.setOnLongClickListener(new OnLongClickListener() { 
-		        @Override
-		        public boolean onLongClick(View v){    
-		        	//Show MAP
-		        	/*
-		        	Toast.makeText(getApplicationContext(), "Starting Google maps", Toast.LENGTH_SHORT).show();
-		        	
-		        	Intent intent = new Intent(BasicrunActivity.this, MapActivity.class); 
-					startActivity(intent);	
-		        	 */
-		            return true;
-		        }
-		    });
-			
-			
-			/*
-			 * DEBUG
-			 */
-			
-			/*	
-			final Button button1 = (Button) findViewById(R.id.button1);
-			button1.setOnClickListener(new OnClickListener() {
-					@Override
-					public void onClick(View v) {
-						List<String> locations = db.getAllLocations();
-						
-						for(int i=0;i<locations.size();i++){
-							Log.v(TAG, locations.get(i));
-						}
-						
-						db.removeSingleMarkerLocations();
-						
-					}
-			});
-			*/
+	
 		}
 		
 		
@@ -289,7 +243,7 @@ public class BasicrunActivity extends Activity {
 	            longtitude = intent.getDoubleExtra("DxLng", 0.0);
 	            speed = intent.getFloatExtra("DxSpeed", 0);
 	            distance = intent.getFloatExtra("DxDistance", 0);
-	            provider = intent.getStringExtra("DxProvider").toUpperCase();
+	            provider = intent.getStringExtra("DxProvider").toUpperCase(new Locale("cs", "CZ"));
 	            
 	            if(latitude!=0.0 && !chckLocated.isChecked())
 	            	chckLocated.setChecked(true);

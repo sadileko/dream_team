@@ -47,6 +47,11 @@ public class HelpActivity extends Activity {
 		setContentView(R.layout.activity_help);
 		Log.d(TAG, "onCreate()");
 		
+		/*
+		 * Buttons
+		 */
+		
+		//Button back
 		final Button btnBackHelp = (Button) findViewById(R.id.btnBackHelp);
 		btnBackHelp.setOnClickListener(new OnClickListener() {
 				@Override

@@ -23,12 +23,13 @@
  *
  **********************************************************************************************************************/
 
-package cz.zcu.kiv.runstat.data;
+package cz.zcu.kiv.runstat.db;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import cz.zcu.kiv.runstat.logic.LocationItem;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
@@ -48,7 +49,7 @@ public class DBHelper extends SQLiteOpenHelper {
 	// Table name
 	public static final String TABLE = "location";
 
-	// Columns
+	// Columns names
 	public static final String TIME = "time";
 	public static final String LONGITUDE = "longtitude";
 	public static final String LATITUDE = "latitude";
@@ -57,7 +58,21 @@ public class DBHelper extends SQLiteOpenHelper {
 	public static final String DISTANCE = "distance";
 	public static final String TYPE = "type";			//Typ bìhu, 0 - zakladni, 1 - distancni, 2 - casovy
 	public static final String RUN_ID = "run_id";	//Id bìhu
-	public static final String SYNC = "sync";
+	public static final String SYNC = "sync";		//záznam pro rozpoznání zda je bìh na serveru	
+	
+	/*
+	 * Columns position
+	 */
+	private final int ID = 			0;
+	private final int _RUNID = 		1;
+	private final int _RUNTYPE = 	2;
+	private final int _SYNC = 		3;
+	private final int _TIME = 		4;
+	private final int _STEPS = 		5;
+	private final int _SPEED = 		6;
+	private final int _DISTANCE =	7;
+	private final int _LAT = 		8;
+	private final int _LNG = 		9;
 	
 	private long lastRowID = 1;
 	private Context ctx;
@@ -74,7 +89,7 @@ public class DBHelper extends SQLiteOpenHelper {
 		
 		String sql = "create table " + TABLE + "( " + BaseColumns._ID
 				+ " integer primary key autoincrement, " + RUN_ID + " integer," + TYPE + " integer,"+ SYNC + " integer," + TIME + " integer, "
-				+ STEPS + " integer, "+ SPEED +" text,"+ DISTANCE+ " text," + LATITUDE + " text, " + LONGITUDE + " text);";
+				+ STEPS + " integer, "+ SPEED +" real,"+ DISTANCE+ " real," + LATITUDE + " real, " + LONGITUDE + " real);";
 		
 		db.execSQL(sql);
 		Log.i(TAG, "Created DB: "+sql);
@@ -121,19 +136,21 @@ public class DBHelper extends SQLiteOpenHelper {
 	/*
 	 * Get last row runID
 	 */
-	public long getLastRowId(){
+	public long getLastRowId(){	
 		
-		
-		String selectQuery = "SELECT  * FROM " + TABLE;
+		String selectQuery = "SELECT MAX(run_id) FROM " + TABLE;
 		 
         SQLiteDatabase db = this.getWritableDatabase();
         Cursor cursor = db.rawQuery(selectQuery, null);
         
-        long lastRow = 0;
-        if(cursor.getCount()>0){
+        long lastRow = 1;
+        
+        if( cursor.getCount() > 0 ){
         	cursor.moveToLast();
-        	lastRow = cursor.getInt(1);
+        	lastRow = cursor.getLong(0);
         }
+        
+        Log.d(TAG,"lastrow: "+lastRow);
         
         return lastRow;
 	}
@@ -142,13 +159,30 @@ public class DBHelper extends SQLiteOpenHelper {
 	/*
 	 * Get locations by given runId
 	 */
-	public Cursor getLocationsByRunId(long runID){
+	public List<LocationItem> getLocationsByRunId(long runID){
 		String selectQuery = "SELECT  * FROM " + TABLE + " WHERE run_id="+runID;
-		 
+		
+		List<LocationItem> locations = new ArrayList<LocationItem>();
+		
         SQLiteDatabase db = this.getWritableDatabase();
         Cursor cursor = db.rawQuery(selectQuery, null);
         
-        return cursor;
+        while (cursor.moveToNext()) {	
+
+			locations.add(new LocationItem(
+					cursor.getLong(ID),
+					cursor.getLong(_TIME), 
+					cursor.getFloat(_SPEED),
+					cursor.getFloat(_DISTANCE),
+					cursor.getDouble(_LAT),
+					cursor.getDouble(_LNG)
+					));
+						
+		}
+        
+        db.close();
+        
+        return locations;
 	}
 	
 	
@@ -159,7 +193,7 @@ public class DBHelper extends SQLiteOpenHelper {
 			removeSingleMarkerLocations();
 		
 			List<LocationItem> locationsList = new ArrayList<LocationItem>();
-	        String selectQuery = "SELECT MIN(sync), run_id, type, MIN(time), MAX(time), MAX(steps), AVG(speed), MAX(speed), MAX(distance), latitude, longtitude FROM "+TABLE+" GROUP BY run_id";
+	        String selectQuery = "SELECT MIN(sync), run_id, type, MIN(time), MAX(time), MAX(steps), AVG(speed), MAX(speed), MAX(distance), latitude, longtitude FROM "+TABLE+" GROUP BY run_id;";
 	 
 	        SQLiteDatabase db = this.getWritableDatabase();
 	        Cursor cursor = db.rawQuery(selectQuery, null);
@@ -178,16 +212,18 @@ public class DBHelper extends SQLiteOpenHelper {
 	            			cursor.getFloat(8),
 	            			cursor.getDouble(9),
 	            			cursor.getDouble(10)
-	            			));	            	
+	            			));	        
 	            } while (cursor.moveToNext());
 	        }
+	        
+	        db.close();
 	        
 	        return locationsList;
 	}
 	
 	
 	/*
-	 * 
+	 * Get locations as list of LocationItems for DbSync
 	 */
 	public List<LocationItem> getAllLocationsAsList(){
 		removeSingleMarkerLocations();	//clean up DB before synchronize
@@ -202,29 +238,38 @@ public class DBHelper extends SQLiteOpenHelper {
             do {
             	
             	locationsList.add(new LocationItem(
-            			cursor.getLong(0),
-            			cursor.getLong(1),
-            			cursor.getInt(2),
-            			cursor.getLong(4),
-            			cursor.getInt(5),
-            			cursor.getFloat(6),
-            			cursor.getFloat(7),
-            			cursor.getDouble(8),
-            			cursor.getDouble(9)
+            			cursor.getLong(ID),
+            			cursor.getLong(_RUNID),
+            			cursor.getInt(_RUNTYPE),
+            			cursor.getLong(_TIME),
+            			cursor.getInt(_STEPS),
+            			cursor.getFloat(_SPEED),
+            			cursor.getFloat(_DISTANCE),
+            			cursor.getDouble(_LAT),
+            			cursor.getDouble(_LNG)
             			));
             	
             } while (cursor.moveToNext());
         }
         
-        selectQuery = "UPDATE "+TABLE+" SET sync='1' WHERE sync='0'";
-        db.execSQL(selectQuery);
+        db.close();
         
         return locationsList;
 	}
 	
 	
+	public void markAsSynchronized(long run_id){
+		SQLiteDatabase db = this.getWritableDatabase();
+		
+		String updateQuery = "UPDATE "+TABLE+" SET sync='1' WHERE sync='0' AND _id='"+run_id+"'";
+        db.execSQL(updateQuery);
+        
+        db.close();
+	}
+	
+	
 	/*
-	 * Returns all locations from DB as list of strings - for log
+	 * Returns all locations from DB as list of strings - for logging
 	 */
 	public List<String> getAllLocations() {
         List<String> locationList = new ArrayList<String>();
@@ -246,7 +291,8 @@ public class DBHelper extends SQLiteOpenHelper {
             } while (cursor.moveToNext());
         }
  
-        // return contact list
+        db.close();
+
         return locationList;
     }
 	
@@ -258,6 +304,8 @@ public class DBHelper extends SQLiteOpenHelper {
 	public void removeAllLocations(){
 		SQLiteDatabase db = this.getWritableDatabase();
 	    db.delete(TABLE, null, null);
+	    
+	    db.close();
 	}
 	
 	
@@ -270,6 +318,8 @@ public class DBHelper extends SQLiteOpenHelper {
 		
 		db.execSQL(deleteQuery);
 		Log.i(TAG, "RunId: " + runID + " deleted succesfully.");
+		
+		db.close();
 	}
 	
 	
@@ -299,6 +349,45 @@ public class DBHelper extends SQLiteOpenHelper {
         }
   
         db.close();
+	}
+	
+	
+	/*
+	 * Removes locations where distance is less than 1m
+	 */
+	public void removeZeroDistanceLocations(){
+		String selectQuery = "SELECT run_id, MAX(distance) FROM "+TABLE+" GROUP BY run_id";
+		String deleteQuery = "DELETE FROM "+TABLE+" WHERE "; 
+		
+		SQLiteDatabase db = this.getWritableDatabase();
+        Cursor cursor = db.rawQuery(selectQuery, null);
+
+        boolean executable = false;
+        
+		if(cursor.getCount()>0){
+        	
+        	if (cursor.moveToFirst()) {
+        	   do {
+        		   
+        		   if(cursor.getFloat(1) < 1){
+        			   
+        			   if(cursor.isLast()){
+        				   deleteQuery += "run_id='" + cursor.getLong(0) + "'";
+        			   }else{
+        				   deleteQuery += "run_id='" + cursor.getLong(0) + "' OR ";
+        			   }
+        			   
+        			   executable = true;
+        		   }
+        		   
+        	   } while (cursor.moveToNext());
+        	}
+        	
+        	if(executable)
+        		db.execSQL(deleteQuery);
+        }
+		
+		db.close();
 	}
 
 }

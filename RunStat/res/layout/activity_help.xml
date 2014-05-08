@@ -7,11 +7,12 @@
     <ScrollView
         android:id="@+id/scrollView1"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" >
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/btnBackHelp" >
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             android:orientation="vertical" >
 
             <TableLayout
@@ -25,10 +26,11 @@
 
                     <TextView
                         android:id="@+id/txtName"
-                        android:layout_width="wrap_content"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Large Text"
-                        android:textAppearance="?android:attr/textAppearanceLarge" />
+                        android:text="Hlavní stránka"
+                        android:textAppearance="?android:attr/textAppearanceLarge"
+                        android:textStyle="bold" />
 
                 </TableRow>
 
@@ -41,7 +43,7 @@
                         android:id="@+id/txtLocation"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="TextView" />
+                        android:text="Stiskněte Start pro výběr typu běhu. Stiskněte Hisorie pro zobrazení historie vašich běhů. Stiskněte synchronize pro odeslání běhů na server." />
 
                 </TableRow>
 
@@ -54,8 +56,9 @@
                         android:id="@+id/textView3"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Large Text"
-                        android:textAppearance="?android:attr/textAppearanceLarge" />
+                        android:text="Typ běhu"
+                        android:textAppearance="?android:attr/textAppearanceLarge"
+                        android:textStyle="bold" />
 
                 </TableRow>
 
@@ -65,10 +68,11 @@
                     android:layout_height="wrap_content" >
 
                     <TextView
-                        android:id="@+id/textView4"
+                        android:id="@+id/textView1"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="TextView" />
+                        android:text="Základní běh"
+                        android:textAppearance="?android:attr/textAppearanceMedium" />
 
                 </TableRow>
 
@@ -76,12 +80,95 @@
                     android:id="@+id/tableRow5"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content" >
+
+                    <TextView
+                        android:id="@+id/textView2"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Základní typ běhu monitoruje vaši rychlost a doposavaď uběhnutou vzdálenost. Běh se začne monitorovat ihned, jak tento běh zvolíte. Stiskem Konec váš běh zastavíte a uložíte ho do Historie." />
+
                 </TableRow>
 
                 <TableRow
                     android:id="@+id/tableRow6"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content" >
+
+                    <TextView
+                        android:id="@+id/textView4"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Distanční běh"
+                        android:textAppearance="?android:attr/textAppearanceMedium" />
+
+                </TableRow>
+
+                <TableRow
+                    android:id="@+id/tableRow7"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" >
+
+                    <TextView
+                        android:id="@+id/textView5"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Distanční běh vám umožní nastavit si vaší cílovou vzdálenost, kterou chcete uběhnout. Dále sleduje vaší aktuální rychlost. Stiskem Konec váš běh zastavíte a uložíte ho do Historie." />
+
+                </TableRow>
+
+                <TableRow
+                    android:id="@+id/tableRow8"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" >
+
+                    <TextView
+                        android:id="@+id/textView6"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Časový běh"
+                        android:textAppearance="?android:attr/textAppearanceMedium" />
+
+                </TableRow>
+
+                <TableRow
+                    android:id="@+id/tableRow9"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" >
+
+                    <TextView
+                        android:id="@+id/textView7"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Časový běh vám umožní vybrat si délku běhu a aktivuje stopky. Dále monitoduje vzdálenost, kterou jste uběhli. Stiskem Konec váš běh zastavíte a uložíte ho do Historie." />
+
+                </TableRow>
+
+                <TableRow
+                    android:id="@+id/tableRow10"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" >
+
+                    <TextView
+                        android:id="@+id/textView8"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Historie"
+                        android:textAppearance="?android:attr/textAppearanceLarge"
+                        android:textStyle="bold" />
+
+                </TableRow>
+
+                <TableRow
+                    android:id="@+id/tableRow11"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" >
+
+                    <TextView
+                        android:id="@+id/textView9"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Zde je zobrazena Historie vašich běhů. Klepnutím na záznam zobrazíte běh na mapě." />
+
                 </TableRow>
 
             </TableLayout>

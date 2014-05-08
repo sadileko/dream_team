@@ -28,14 +28,18 @@ package cz.zcu.kiv.runstat.ui;
 import cz.zcu.kiv.runstat.R;
 import android.app.Activity;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.os.Bundle;
+import android.preference.Preference;
+import android.preference.PreferenceActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 
-public class SettingsActivity extends Activity {
+public class SettingsActivity extends PreferenceActivity implements OnSharedPreferenceChangeListener {
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -48,6 +52,14 @@ public class SettingsActivity extends Activity {
 		
 	}
 	
+	public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+        if (key.equals("pref_usewifi")) {
+            Preference connectionPref = findPreference(key);
+            // Set summary to be the user-description for the selected value
+            connectionPref.setSummary(sharedPreferences.getString(key, ""));
+        }
+    }
+
 	
 	@Override
 	public void onDestroy(){

@@ -23,7 +23,7 @@
  *
  **********************************************************************************************************************/
 
-package cz.zcu.kiv.runstat.data;
+package cz.zcu.kiv.runstat.db;
 
 import java.io.BufferedReader;
 import java.io.InputStream;
@@ -42,9 +42,13 @@ import org.apache.http.message.BasicNameValuePair;
 import org.json.JSONObject;
 
 import cz.zcu.kiv.runstat.R;
+import cz.zcu.kiv.runstat.logic.LocationItem;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.app.Activity;
+import android.content.Context;
 import android.graphics.Color;
 import android.util.Log;
 import android.view.View;
@@ -56,6 +60,10 @@ public class DbSync extends Activity {
 
 	// Classname for logging purposes
 	private final String TAG = this.getClass().getSimpleName();
+	
+	private final String SERVERADDRESS = "http://tomasbouda.cz/zswi/dbHandler/insert.php";
+	
+	private String message = "";
 	
 	DBHelper dbh;
 	
@@ -73,55 +81,87 @@ public class DbSync extends Activity {
         Log.d(TAG, "onCreate()");
         
         dbh = new DBHelper(getApplicationContext());
-        
-        Button insert=(Button) findViewById(R.id.btnSync);
-        
+                
         pBarSync = (ProgressBar) findViewById(R.id.pBarSync);
         
-        insert.setOnClickListener(new View.OnClickListener() {
-			
+        Button insert=(Button) findViewById(R.id.btnSync);
+        insert.setOnClickListener(new View.OnClickListener() {			
 		@Override
 		public void onClick(View v) {
 			
-			new postOperation().execute("");
+			if(isOnline()){
+				Toast.makeText(getApplicationContext(), "Synchronizing...", Toast.LENGTH_SHORT).show();
+				new postOperation().execute("");
+			}
+			else
+				Toast.makeText(getApplicationContext(), "Internet connection is not available!", Toast.LENGTH_LONG).show();
 
 		}
-	});
+        });
         
-}
+    }
     
+    public boolean isOnline() {
+        ConnectivityManager cm =
+            (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo netInfo = cm.getActiveNetworkInfo();
+        if (netInfo != null && netInfo.isConnectedOrConnecting()) {
+            return true;
+        }
+        return false;
+    }
     
 private class postOperation extends AsyncTask<String, Void, String> {
 
     	private final String TAG = this.getClass().getSimpleName();
+
+    	private int count =0;
     	
         @Override
         protected String doInBackground(String... params) {
         	Log.i(TAG, "doInBackground()");
         	
         	List<LocationItem> locations = dbh.getAllLocationsAsList();
-        	
-        	pBarSync.setMax( locations.size()*3 );
+
+        	pBarSync.setMax( locations.size() * 3 );
         	
         	for(int i =0; i<locations.size(); i++){
-        		insert(
-        				locations.get(i).runID,
-        				locations.get(i).runType,
-        				locations.get(i).timeDate,
-        				locations.get(i).steps,
-        				locations.get(i).speed,
-        				locations.get(i).distance,
-        				locations.get(i).lat,
-        				locations.get(i).lng
-        				);
+        		//If connection is available send data to server
+        		if(isOnline()){
+        			insert(
+        					locations.get(i).runID,
+        					locations.get(i).runType,
+        					locations.get(i).timeDate,
+        					locations.get(i).steps,
+        					locations.get(i).speed,
+        					locations.get(i).distance,
+        					locations.get(i).lat,
+        					locations.get(i).lng
+        					);
+        			
+        			//Mark locations with specific id as synchronized
+        			dbh.markAsSynchronized(locations.get(i).id);
+        			
+        			count++;
+        		}
+        		else{
+        			message = "Internet connection was lost! Please resolve the problem and try again.";
+        			break;
+        		}
         	}
         	
+        	if(count>0)
+        		message = count + " rows was succesfully sended to server.";
+        	else
+        		message = "All records are on server.";
+        		
         	return "Executed";
         }
 
         @Override
         protected void onPostExecute(String result) {
-        	Toast.makeText(getApplicationContext(), String.valueOf(pBarSync.getMax()/3) + " rows was succesfully inserted into MySql DB", Toast.LENGTH_LONG).show();
+        	Toast.makeText(getApplicationContext(), message, Toast.LENGTH_LONG).show();
+        	count=0;
         }
 
         @Override
@@ -158,7 +198,7 @@ private class postOperation extends AsyncTask<String, Void, String> {
         	{
         		
         		HttpClient httpclient = new DefaultHttpClient();
-    	        HttpPost httppost = new HttpPost("http://runstat.hostuju.cz/insert.php");
+    	        HttpPost httppost = new HttpPost(SERVERADDRESS);
     	        
     	        httppost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
     	        HttpResponse response = httpclient.execute(httppost); 

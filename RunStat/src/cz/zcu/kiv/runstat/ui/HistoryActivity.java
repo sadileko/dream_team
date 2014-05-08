@@ -29,15 +29,14 @@ import java.io.IOException;
 import java.util.List;
 
 import cz.zcu.kiv.runstat.R;
-import cz.zcu.kiv.runstat.data.DBHelper;
-import cz.zcu.kiv.runstat.data.LocationItem;
+import cz.zcu.kiv.runstat.db.DBHelper;
+import cz.zcu.kiv.runstat.logic.LocationItem;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -45,16 +44,12 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.BaseAdapter;
-import android.widget.CheckBox;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-/**
- * @author Pranay Airan
- * 
- */
+
 public class HistoryActivity extends Activity {
 
 	
@@ -191,10 +186,10 @@ public class HistoryActivity extends Activity {
 			locationDuration.setText(" "+locItem.locationDescription);
 			
 			if(locItem.synchronyzed){
-				synced.setVisibility(synced.VISIBLE);
+				synced.setVisibility(View.VISIBLE);
 			}else
 			{
-				synced.setVisibility(synced.INVISIBLE);
+				synced.setVisibility(View.INVISIBLE);
 			}
 			
 			
@@ -213,9 +208,9 @@ public class HistoryActivity extends Activity {
     {
     	DBHelper dbh = new DBHelper(getApplicationContext());
     	List<LocationItem> locationsList = dbh.getRunningEvents();
-
     	
     	return locationsList;
     	
     }
-}
+}	
+	

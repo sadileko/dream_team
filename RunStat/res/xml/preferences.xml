@@ -1,21 +1,12 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
     <PreferenceCategory 
-        android:title="@string/pref_sms_storage_title"
-        android:key="pref_key_storage_settings">
+        android:title="@string/pref_general"
+        android:key="pref_general">
         <CheckBoxPreference
-            android:key="pref_key_auto_delete"
-            android:summary="@string/pref_summary_auto_delete"
-            android:title="@string/pref_title_auto_delete"
+            android:key="pref_key_usewifi"
+            android:summary="@string/pref_summary_usewifi"
+            android:title="@string/pref_title_usewifi"
             android:defaultValue="false" />
-        <Preference 
-            android:key="pref_key_sms_delete_limit"
-            android:dependency="pref_key_auto_delete"
-            android:summary="@string/pref_summary_delete_limit"
-            android:title="@string/pref_title_sms_delete" />
-        <Preference 
-            android:key="pref_key_mms_delete_limit"
-            android:dependency="pref_key_auto_delete"
-            android:summary="@string/pref_summary_delete_limit"
-            android:title="@string/pref_title_mms_delete" />
+        
     </PreferenceCategory>
 </PreferenceScreen>

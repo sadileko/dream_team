@@ -27,6 +27,7 @@ package cz.zcu.kiv.runstat.ui;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -38,10 +39,10 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
 
 import cz.zcu.kiv.runstat.R;
-import cz.zcu.kiv.runstat.data.DBHelper;
+import cz.zcu.kiv.runstat.db.DBHelper;
+import cz.zcu.kiv.runstat.logic.LocationItem;
 import android.app.Activity;
 import android.content.Intent;
-import android.database.Cursor;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
@@ -71,12 +72,12 @@ public class MapActivity extends Activity {
         
         map = ((MapFragment) getFragmentManager().findFragmentById(R.id.map)).getMap();
 
-        //Load locations with specific run_id from DB
-        Cursor cursor = dbh.getLocationsByRunId(runID);
         
-    	setMarkers(cursor, 0);
+        //Load locations with specified run_id from DB       
+        List<LocationItem> locations = dbh.getLocationsByRunId(runID);
+              
+    	setMarkers(locations, 0);
     	
-    	cursor.close();
     	dbh.close();
     }
     
@@ -84,45 +85,35 @@ public class MapActivity extends Activity {
     /*
      * Pin given locations to map
      */
-	protected void setMarkers(Cursor cursor, long idPoint){
+	protected void setMarkers(List<LocationItem> locations, long idPoint){
 		PolylineOptions po = new PolylineOptions().color(Color.argb(125,14,4,161)).geodesic(true);
 		
-		long rows = cursor.getCount();
-		
-		while (cursor.moveToNext()) {
+		for(int i=0; i<locations.size();i++){
+			long id = locations.get(i).id;
+			long timeMills = locations.get(i).time;
+			float speed =locations.get(i).speed;
+			float distance = locations.get(i).distance;
+			double latitude = locations.get(i).lat;
+			double longitude = locations.get(i).lng;
 
-			long id = cursor.getLong(0);
-			long timeMils = cursor.getLong(4);
-			//int steps = cursor.getInt(4);		Unused, for now
-			
-			//Convert speed to km/h and round
-			float speed = cursor.getFloat(6);
-			float roundedSpeed = (float)Math.round(speed * 36) / 10;
-			
-			float distance = cursor.getFloat(7);
-			double latitude = cursor.getDouble(8);
-			double longitude = cursor.getDouble(9);			
-			
 			SimpleDateFormat sdf = new SimpleDateFormat("HH:mm, dd.MMM.yyyy", locale);
 			
-			Date resultdate = new Date(timeMils);
-			String time = ((sdf.format(resultdate)).toString());
-
-			long position = cursor.getPosition();
+			Date resultdate = new Date(timeMills);
+			String timeDate = ((sdf.format(resultdate)).toString());
 			
-			if(position == 0 || position == (rows-1)){
+			if(i == 0 || i == (locations.size()-1)){
 				distance = Math.round(distance);
-				addMarker(new LatLng(latitude, longitude), time, roundedSpeed, 270, distance);				
-			}
-			
-			po.add(new LatLng(latitude, longitude));
+				addMarker(new LatLng(latitude, longitude), timeDate, speed, 270, distance);				
+			}			
 			
 			if(idPoint==0||idPoint==id){
 				map.moveCamera(CameraUpdateFactory.newLatLngZoom(
 						new LatLng(latitude, longitude), 16));
 			}
 			
+			po.add(new LatLng(latitude, longitude));
 		}
+
 		map.addPolyline(po);
 	}
 	

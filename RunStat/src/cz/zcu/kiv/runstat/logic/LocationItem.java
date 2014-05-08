@@ -23,7 +23,7 @@
  *
  **********************************************************************************************************************/
 
-package cz.zcu.kiv.runstat.data;
+package cz.zcu.kiv.runstat.logic;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -87,6 +87,21 @@ public class LocationItem {
 			this.timeDate = convertToDateFormatDB(time);
 		}
 		
+		/*
+		 * Constructor for Map
+		 */
+		public LocationItem(long id, long time, float speed, float distance, double lat, double lng){
+			this.time = time;
+			this.speed = (float)Math.round(speed * 36) / 10;
+			this.distance = distance;
+			this.lat = lat;
+			this.lng = lng;	
+			this.timeDate = convertToDateFormat(time);
+		}
+		
+		/*
+		 * Converts milliseconds to date time format (5:40, 09.kvì.2014)
+		 */
 		private String convertToDateFormat(long timeInMills){
 			Locale locale = new Locale("cs", "CZ");
 			

@@ -25,8 +25,10 @@
 
 package cz.zcu.kiv.runstat.ui;
 
+import java.util.List;
+
 import cz.zcu.kiv.runstat.R;
-import cz.zcu.kiv.runstat.data.DbSync;
+import cz.zcu.kiv.runstat.db.*;
 import android.os.Bundle;
 import android.app.Activity;
 import android.content.Intent;
@@ -39,7 +41,7 @@ import android.widget.Button;
 
 
 public class MainActivity extends Activity{
-
+	DBHelper db;
 	private final String TAG = this.getClass().getSimpleName();
 	
 	/*
@@ -52,7 +54,7 @@ public class MainActivity extends Activity{
 		setContentView(R.layout.activity_main);
 		Log.d(TAG, "onCreate()");
 		
-		
+		db = new DBHelper(getApplicationContext());
 		/*
 		 * Buttons
 		 */
@@ -87,9 +89,15 @@ public class MainActivity extends Activity{
 
 					Intent intent = new Intent(MainActivity.this, DbSync.class); 
 					startActivityForResult(intent, 0);
-										
+						
+					/*
+					List<String> locations = db.getAllLocations();
+					for(int i=0;i<locations.size();i++){
+						Log.v("Main", locations.get(i));
+					}*/
 				}
 		});
+		
 	}
 	
 	
