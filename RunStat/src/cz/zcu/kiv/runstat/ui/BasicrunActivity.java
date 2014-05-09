@@ -79,6 +79,7 @@ public class BasicrunActivity extends Activity {
 		
 		//View
 		private Handler myHandler;
+		private AlertDialog.Builder builder;
 		private TextView txtSteps;	
 		private TextView txtCurrentSpeed;
 		private TextView txtDistance;
@@ -122,7 +123,7 @@ public class BasicrunActivity extends Activity {
 	        startRService();
 	        
 	        //Message box 
-	        final AlertDialog.Builder builder = new AlertDialog.Builder(this);
+	        builder = new AlertDialog.Builder(this);
 	    	builder
 	    	.setTitle("Exit running")
 	    	.setMessage("Are you sure?")
@@ -150,7 +151,7 @@ public class BasicrunActivity extends Activity {
 							builder.show();									
 					}
 			});
-			
+						
 			//Show help
 			final ImageButton btnHelp = (ImageButton) findViewById(R.id.btnHelp);
 			btnHelp.setOnClickListener(new OnClickListener() {
@@ -163,6 +164,13 @@ public class BasicrunActivity extends Activity {
 	
 		}
 		
+		/*
+		 * Hardware button back
+		 */
+		@Override
+		public void onBackPressed() {
+			builder.show();
+		}
 		
 		@Override
 		public void onDestroy(){

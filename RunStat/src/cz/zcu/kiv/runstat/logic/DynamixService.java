@@ -65,7 +65,8 @@ public class DynamixService extends Service{
 
 	private int runType = 0;
 	private boolean firstCall = true;
-
+	private boolean isFirstLocation = true;
+	
 	SharedPreferences sharedPref;
 	private boolean settingUseWifiProvider;
 	
@@ -196,46 +197,55 @@ public class DynamixPlugin {
 	 */
 	private void locationEvent(ILocationContextInfo data){
 		
-		settingUseWifiProvider = sharedPref.getBoolean("pref_key_usewifi", false);
+		//First location is usually bad, so we wont save it in DB. This is caused by framework and can´t fix it.
+		if(!isFirstLocation){
+			settingUseWifiProvider = sharedPref.getBoolean("pref_key_usewifi", false);
 		
-		 //Save location for calculating distance
-	     prevLat = latitude;
-	     prevLng = longtitude;
+			//Save location for calculating distance
+			prevLat = latitude;
+			prevLng = longtitude;
 	     
-	     //get location
-	     latitude = data.getLatitude();
-	     longtitude = data.getLongitude();
+			//get location
+			latitude = data.getLatitude();
+			longtitude = data.getLongitude();
 	     
-	     //get current speed
-	     speed = data.getSpeed();
+			//get current speed
+			speed = data.getSpeed();
 
-	     //Calculate distance between two locations
-	     if(prevLat!=0.0 && prevLng!=0.0){
-	    	 Location prevLocation = new Location("");
-	    	 prevLocation.setLatitude(prevLat);
-	    	 prevLocation.setLongitude(prevLng);
-	    	 Location myLocation = new Location("");
-	    	 myLocation.setLatitude(latitude);
-	    	 myLocation.setLongitude(longtitude);
-	    	 distance += prevLocation.distanceTo(myLocation);
+			//Calculate distance between two locations
+			if(prevLat!=0.0 && prevLng!=0.0){
+				Location prevLocation = new Location("");
+				prevLocation.setLatitude(prevLat);
+				prevLocation.setLongitude(prevLng);
+				Location myLocation = new Location("");
+				myLocation.setLatitude(latitude);
+				myLocation.setLongitude(longtitude);
+				distance += prevLocation.distanceTo(myLocation);
 	    	 
-	     }else{
-	    	 distance = 0;
-	     }
+			}else{
+				distance = 0;
+			}
 	     
-	     provider = data.getProvider();	  
-
-	     //if wifi provider is enabled in settings or gps is available
-	     if((settingUseWifiProvider && provider.equals("network")) || provider.equals("gps")){
-	    	 //Save location to DB
-	    	 db.addToDatabase(Double.toString(latitude), Double.toString(longtitude), runType, steps, Float.toString(speed), Float.toString(distance), firstCall);
+			provider = data.getProvider();	  
+			
+			//if wifi provider is enabled in settings or gps is available
+			if((settingUseWifiProvider && provider.equals("network")) || provider.equals("gps")){
+	    	 
+	    	 
+				//Save location to DB	    	 
+				db.addToDatabase(Double.toString(latitude), Double.toString(longtitude), runType, steps, Float.toString(speed), Float.toString(distance), firstCall);
+	    		 
+				//Send data to UI
+				broadcast();
 	     
-	    	 //Send data to UI
-	    	 broadcast();
-	     
-	    	 //Lock run_id
-	    	 firstCall = false;
-	     }
+				//Lock run_id
+				firstCall = false;
+	    	 
+				isFirstLocation = false;
+			}
+		}
+		
+		isFirstLocation = false;
 	}
 	
 	/*

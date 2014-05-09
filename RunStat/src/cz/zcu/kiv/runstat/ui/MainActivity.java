@@ -94,14 +94,14 @@ public class MainActivity extends Activity{
 				public void onClick(View v) {
 					Log.i(TAG, "DBSync");
 
-					Intent intent = new Intent(MainActivity.this, DbSync.class); 
-					startActivityForResult(intent, 0);
+					//Intent intent = new Intent(MainActivity.this, DbSync.class); 
+					//startActivityForResult(intent, 0);
 						
-					/*
+					
 					List<String> locations = db.getAllLocations();
 					for(int i=0;i<locations.size();i++){
 						Log.v("Main", locations.get(i));
-					}*/
+					}
 				}
 		});
 		
