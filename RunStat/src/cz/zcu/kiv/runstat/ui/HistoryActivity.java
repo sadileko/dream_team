@@ -174,6 +174,7 @@ public class HistoryActivity extends Activity {
 			TextView locationAvgSpeed = (TextView)arg1.findViewById(R.id.txtHistoryAvgSpeed);
 			TextView locationMaxSpeed = (TextView)arg1.findViewById(R.id.txtHistoryMaxSpeed);
 			TextView locationDuration = (TextView)arg1.findViewById(R.id.txtHistoryDuration);
+			TextView locationDate = (TextView)arg1.findViewById(R.id.txtHistoryDate);
 			ImageView synced = (ImageView)arg1.findViewById(R.id.imgSynced);
 			
 			LocationItem locItem = locationList.get(arg0);
@@ -196,7 +197,8 @@ public class HistoryActivity extends Activity {
 			locationDistance.setText("Distance: "+locItem.distance+" m");
 			locationAvgSpeed.setText("Average speed: "+locItem.avgSpeed+" km/h");
 			locationMaxSpeed.setText("Max. speed: "+locItem.speed+" km/h");
-			locationDuration.setText("Date: "+locItem.timeDate);
+			locationDate.setText("Date: "+locItem.timeDate);
+			locationDuration.setText("Duration: "+millsToTime(locItem.time));
 			
 			if(locItem.synchronyzed){
 				synced.setVisibility(View.VISIBLE);
@@ -216,6 +218,19 @@ public class HistoryActivity extends Activity {
 
     }
     
+    private String millsToTime(long mills){
+    	int seconds = (int) (mills / 1000) % 60 ;
+    	int minutes = (int) ((mills / (1000*60)) % 60);
+    	int hours   = (int) ((mills / (1000*60*60)) % 24);
+    	
+    	 String time = String.format("%dh,%dm,%ds", 
+    			 hours,
+    			 minutes,	
+    			 seconds						    		    
+	    		);
+    	 
+    	 return time;
+    }
     
     public List<LocationItem> getDataForListView() throws IOException
     {

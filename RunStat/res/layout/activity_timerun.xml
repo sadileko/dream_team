@@ -139,16 +139,6 @@
 
     </RelativeLayout>
 
-    <TextView
-        android:id="@+id/txtTime"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/formInfo"
-        android:layout_centerHorizontal="true"
-        android:text=" "
-        android:textAppearance="?android:attr/textAppearanceLarge"
-        android:visibility="invisible" />
-
     <RelativeLayout
         android:id="@+id/formSetDistance"
         android:layout_width="wrap_content"
@@ -164,7 +154,7 @@
             android:orientation="vertical" >
 
             <TextView
-                android:id="@+id/textView1"
+                android:id="@+id/txtHistoryDuration"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/strSetTime"
@@ -237,5 +227,14 @@
             android:layout_marginRight="32dp"
             android:text="@string/strBtnSetDistance" />
     </RelativeLayout>
+
+    <TextView
+        android:id="@+id/txtTimee"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/formLocationInfo"
+        android:layout_centerHorizontal="true"
+        android:text=" "
+        android:textAppearance="?android:attr/textAppearanceMedium" />
 
 </RelativeLayout>

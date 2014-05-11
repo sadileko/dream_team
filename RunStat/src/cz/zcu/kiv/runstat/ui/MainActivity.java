@@ -25,6 +25,8 @@
 
 package cz.zcu.kiv.runstat.ui;
 
+import java.util.List;
+
 import cz.zcu.kiv.runstat.R;
 import cz.zcu.kiv.runstat.db.*;
 import android.os.Bundle;
@@ -59,7 +61,6 @@ public class MainActivity extends Activity{
 		
 		db = new DBHelper(getApplicationContext());
 		
-		//final ProgressBar pBarWait = (ProgressBar) findViewById(R.id.pBarWait);
 		
 		/*
 		 * Buttons
@@ -99,6 +100,13 @@ public class MainActivity extends Activity{
 
 					Intent intent = new Intent(MainActivity.this, DbSync.class); 
 					startActivityForResult(intent, 0);
+					
+					/*
+					List<String> locations = db.getAllLocations();
+					for(int i=0;i<locations.size();i++){
+						
+						Log.v("DB", locations.get(i));
+					}*/
 				}
 		});
 		

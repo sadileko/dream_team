@@ -58,7 +58,7 @@
         android:textAppearance="?android:attr/textAppearanceSmall" />
 
     <TextView
-        android:id="@+id/txtHistoryDuration"
+        android:id="@+id/txtHistoryDate"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignLeft="@+id/txtHistoryMaxSpeed"
@@ -75,5 +75,14 @@
         android:layout_marginRight="14dp"
         android:src="@drawable/synced"
         android:visibility="invisible" />
+
+    <TextView
+        android:id="@+id/txtHistoryDuration"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/txtHistoryDate"
+        android:layout_below="@+id/txtHistoryDate"
+        android:text="Small Text"
+        android:textAppearance="?android:attr/textAppearanceSmall" />
 
 </RelativeLayout> 

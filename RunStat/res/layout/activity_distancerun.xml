@@ -153,12 +153,12 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentLeft="true"
-            android:layout_below="@+id/textView1"
+            android:layout_below="@+id/txtHistoryDuration"
             android:ems="10"
             android:inputType="number" />
 
         <TextView
-            android:id="@+id/textView1"
+            android:id="@+id/txtHistoryDuration"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignLeft="@+id/txtSetHours"
@@ -179,5 +179,14 @@
             android:text="@string/strBtnSetDistance" />
 
     </RelativeLayout>
+
+    <TextView
+        android:id="@+id/txtFinalMessage"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/formLocationInfo"
+        android:layout_centerHorizontal="true"
+        android:text=" "
+        android:textAppearance="?android:attr/textAppearanceMedium" />
 
 </RelativeLayout>

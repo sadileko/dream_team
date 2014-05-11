@@ -62,7 +62,7 @@ public class DbSync extends Activity {
 	// Classname for logging purposes
 	private final String TAG = this.getClass().getSimpleName();
 	
-	private final String SERVERADDRESS = "http://tomasbouda.cz/zswi/dbHandler/insert.php";
+	private final String SERVERADDRESS = "http://runstat.hostuju.cz/insert.php";
 	
 	private String message = "";
 	
@@ -143,7 +143,8 @@ private class postOperation extends AsyncTask<String, Void, String> {
         					locations.get(i).speed,
         					locations.get(i).distance,
         					locations.get(i).lat,
-        					locations.get(i).lng
+        					locations.get(i).lng,
+        					locations.get(i).time
         					);
         			
         			//Mark locations with specific id as synchronized
@@ -180,7 +181,7 @@ private class postOperation extends AsyncTask<String, Void, String> {
         /*
          * Insert location to server over POST request
          */
-        public void insert(long run_id, int run_type, String time, int steps, float speed, float distance, double lat, double lng)
+        public void insert(long run_id, int run_type, String date, int steps, float speed, float distance, double lat, double lng, long time)
         {
         	ArrayList<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>();
      
@@ -191,15 +192,17 @@ private class postOperation extends AsyncTask<String, Void, String> {
         	String strDistance = String.valueOf(distance);
         	String strLat = String.valueOf(lat);
         	String strLng = String.valueOf(lng);
+        	String strTime = String.valueOf(time);
         	
         	nameValuePairs.add(new BasicNameValuePair("run_id", strRun_id));
         	nameValuePairs.add(new BasicNameValuePair("run_type", strRun_type));
-        	nameValuePairs.add(new BasicNameValuePair("time", time));
+        	nameValuePairs.add(new BasicNameValuePair("date", date));
         	nameValuePairs.add(new BasicNameValuePair("steps", strSteps));
         	nameValuePairs.add(new BasicNameValuePair("speed", strSpeed));
         	nameValuePairs.add(new BasicNameValuePair("distance", strDistance));
         	nameValuePairs.add(new BasicNameValuePair("lat", strLat));
         	nameValuePairs.add(new BasicNameValuePair("lng", strLng));
+        	nameValuePairs.add(new BasicNameValuePair("time", strTime));
 
         	try
         	{

@@ -37,6 +37,8 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.media.AudioManager;
+import android.media.ToneGenerator;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.os.Handler;
@@ -295,12 +297,16 @@ public class DistancerunActivity extends Activity {
 				       
 						   txtProvider.setText("Provider: " + settingsProvider); 
 						   
-					   }else
+					   }else	//END of running
 					   {						   
 						   stopRService();
 						   myHandler.removeCallbacks(stepsUpdate);
 						   txtDistance.setText(""+ Math.round(distanceGoal) +"/"+distanceGoal+" m");
-						   Toast.makeText(getApplicationContext(), "You passed the distance. Good job.", Toast.LENGTH_SHORT).show();
+						   TextView txtFinalMessage = (TextView) findViewById(R.id.txtFinalMessage);
+						   txtFinalMessage.setText("You passed the distance.");
+						   Toast.makeText(getApplicationContext(), "You passed the distance.", Toast.LENGTH_SHORT).show();
+						   ToneGenerator toneG = new ToneGenerator(AudioManager.STREAM_ALARM, 1000);
+						   toneG.startTone(ToneGenerator.TONE_CDMA_ALERT_CALL_GUARD, 1000); 
 					   }
 				        
 				   }else

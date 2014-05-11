@@ -90,20 +90,16 @@ public class MapActivity extends Activity {
 		
 		for(int i=0; i<locations.size();i++){
 			long id = locations.get(i).id;
-			long timeMills = locations.get(i).time;
+			String date = locations.get(i).date;
 			float speed =locations.get(i).speed;
 			float distance = locations.get(i).distance;
 			double latitude = locations.get(i).lat;
 			double longitude = locations.get(i).lng;
 
-			SimpleDateFormat sdf = new SimpleDateFormat("HH:mm, dd.MMM.yyyy", locale);
-			
-			Date resultdate = new Date(timeMills);
-			String timeDate = ((sdf.format(resultdate)).toString());
 			
 			if(i == 0 || i == (locations.size()-1)){
 				distance = Math.round(distance);
-				addMarker(new LatLng(latitude, longitude), timeDate, speed, 270, distance);				
+				addMarker(new LatLng(latitude, longitude), date, speed, 270, distance);				
 			}			
 			
 			if(idPoint==0||idPoint==id){
@@ -121,18 +117,18 @@ public class MapActivity extends Activity {
 	/*
 	 * Add marker to map
 	 */
-	protected void addMarker(LatLng position, String time, float speed, int color, float distance){
+	protected void addMarker(LatLng position, String date, float speed, int color, float distance){
 		if(distance!=0){
 			map.addMarker(new MarkerOptions()
 			.icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_launcher))
-			.title(time)
+			.title(date)
 			.snippet("Distance: "+ distance + "m")
 			.position(position));
 		}
 		else{
 			map.addMarker(new MarkerOptions()
 			.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE))
-			.title(time)
+			.title(date)
 			.snippet("Speed: " + Float.toString(speed)+"km/h")
 			.position(position));
 		}

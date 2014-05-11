@@ -37,6 +37,8 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.media.AudioManager;
+import android.media.ToneGenerator;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.os.CountDownTimer;
@@ -122,7 +124,7 @@ public class TimerunActivity extends Activity {
 			pBar = (ProgressBar) findViewById(R.id.pBar);
 			txtSetHours = (EditText) findViewById(R.id.txtSetHours);
 			txtSetMinutes = (EditText) findViewById(R.id.txtSetMinutes);
-			txtTime = (TextView) findViewById(R.id.txtTime);
+			txtTime = (TextView) findViewById(R.id.txtTimee);
 			formInfo = (RelativeLayout) findViewById(R.id.formInfo);
 			formSetDistance = (RelativeLayout) findViewById(R.id.formSetDistance);
 			formLocationInfo = (RelativeLayout) findViewById(R.id.formLocationInfo);
@@ -367,6 +369,8 @@ public class TimerunActivity extends Activity {
 					    	 myHandler.removeCallbacks(stepsUpdate);
 					    	 txtTime.setText("You have finished your running.");
 					    	 Toast.makeText(getApplicationContext(), "You have finished your running.", Toast.LENGTH_SHORT).show();
+					    	 ToneGenerator toneG = new ToneGenerator(AudioManager.STREAM_ALARM, 1000);
+							 toneG.startTone(ToneGenerator.TONE_CDMA_ALERT_CALL_GUARD, 1000); 
 					     }
 					  }.start();
 					  

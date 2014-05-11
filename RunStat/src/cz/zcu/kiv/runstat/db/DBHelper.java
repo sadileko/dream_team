@@ -50,7 +50,7 @@ public class DBHelper extends SQLiteOpenHelper {
 	public static final String TABLE = "location";
 
 	// Columns names
-	public static final String TIME = "time";
+	public static final String DATE = "date";
 	public static final String LONGITUDE = "longtitude";
 	public static final String LATITUDE = "latitude";
 	public static final String STEPS = "steps";
@@ -59,6 +59,7 @@ public class DBHelper extends SQLiteOpenHelper {
 	public static final String TYPE = "type";			//Runtype, 0 - basic, 1 - distance, 2 - time
 	public static final String RUN_ID = "run_id";	//Id of running
 	public static final String SYNC = "sync";		//marks if the record is on server
+	public static final String TIME = "time";
 	
 	/*
 	 * Columns position
@@ -67,15 +68,18 @@ public class DBHelper extends SQLiteOpenHelper {
 	private final int _RUNID = 		1;
 	private final int _RUNTYPE = 	2;
 	private final int _SYNC = 		3;
-	private final int _TIME = 		4;
+	private final int _DATE = 		4;
 	private final int _STEPS = 		5;
 	private final int _SPEED = 		6;
 	private final int _DISTANCE =	7;
 	private final int _LAT = 		8;
 	private final int _LNG = 		9;
+	private final int _TIME=		10;
 	
 	private long lastRowID = 1;
 	private Context ctx;
+	
+	private long startTime = 0;
 	
 	public DBHelper(Context context) {
 		super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -88,8 +92,8 @@ public class DBHelper extends SQLiteOpenHelper {
 	public void onCreate(SQLiteDatabase db) {
 		
 		String sql = "create table " + TABLE + "( " + BaseColumns._ID
-				+ " integer primary key autoincrement, " + RUN_ID + " integer," + TYPE + " integer,"+ SYNC + " integer," + TIME + " integer, "
-				+ STEPS + " integer, "+ SPEED +" real,"+ DISTANCE+ " real," + LATITUDE + " real, " + LONGITUDE + " real);";
+				+ " integer primary key autoincrement, " + RUN_ID + " integer," + TYPE + " integer,"+ SYNC + " integer," + DATE + " integer, "
+				+ STEPS + " integer, "+ SPEED +" real,"+ DISTANCE+ " real," + LATITUDE + " real, " + LONGITUDE + " real,"+ TIME + " integer);";
 		
 		db.execSQL(sql);
 		Log.i(TAG, "Created DB: "+sql);
@@ -113,18 +117,24 @@ public class DBHelper extends SQLiteOpenHelper {
 		ContentValues values = new ContentValues();
 				
 		if(firstCall){
-			lastRowID = getLastRowId() + 1; 
+			lastRowID = getLastRowId() + 1;
+			startTime = System.currentTimeMillis();
 		}
 		
 		values.put(RUN_ID, lastRowID);
 		values.put(TYPE, type);
 		values.put(SYNC, 0);
-		values.put(TIME, System.currentTimeMillis());
+		values.put(DATE, System.currentTimeMillis());
 		values.put(STEPS, steps);
 		values.put(SPEED, speed);
 		values.put(DISTANCE, distance);
 		values.put(LATITUDE, lat);
 		values.put(LONGITUDE, lng);
+		
+		if(firstCall)
+			values.put(TIME, 0);
+		else
+			values.put(TIME, System.currentTimeMillis()-startTime);
 		
 		
 		db.insert(TABLE, null, values);
@@ -171,7 +181,7 @@ public class DBHelper extends SQLiteOpenHelper {
 
 			locations.add(new LocationItem(
 					cursor.getLong(ID),
-					cursor.getLong(_TIME), 
+					cursor.getLong(_DATE), 
 					cursor.getFloat(_SPEED),
 					cursor.getFloat(_DISTANCE),
 					cursor.getDouble(_LAT),
@@ -193,7 +203,7 @@ public class DBHelper extends SQLiteOpenHelper {
 			removeSingleMarkerLocations();
 		
 			List<LocationItem> locationsList = new ArrayList<LocationItem>();
-	        String selectQuery = "SELECT MIN(sync), run_id, type, MIN(time), MAX(time), MAX(steps), AVG(speed), MAX(speed), MAX(distance), latitude, longtitude FROM "+TABLE+" GROUP BY run_id;";
+	        String selectQuery = "SELECT MIN(sync), run_id, type, MIN(date), MAX(date), MAX(steps), AVG(speed), MAX(speed), MAX(distance), latitude, longtitude, MAX(time) FROM "+TABLE+" GROUP BY run_id;";
 	 
 	        SQLiteDatabase db = this.getWritableDatabase();
 	        Cursor cursor = db.rawQuery(selectQuery, null);
@@ -212,7 +222,8 @@ public class DBHelper extends SQLiteOpenHelper {
 	            			cursor.getFloat(7),
 	            			cursor.getFloat(8),
 	            			cursor.getDouble(9),
-	            			cursor.getDouble(10)
+	            			cursor.getDouble(10),
+	            			cursor.getLong(11)
 	            			));	        
 	            } while (cursor.moveToNext());
 	        }
@@ -242,12 +253,13 @@ public class DBHelper extends SQLiteOpenHelper {
             			cursor.getLong(ID),
             			cursor.getLong(_RUNID),
             			cursor.getInt(_RUNTYPE),
-            			cursor.getLong(_TIME),
+            			cursor.getLong(_DATE),
             			cursor.getInt(_STEPS),
             			cursor.getFloat(_SPEED),
             			cursor.getFloat(_DISTANCE),
             			cursor.getDouble(_LAT),
-            			cursor.getDouble(_LNG)
+            			cursor.getDouble(_LNG),
+            			cursor.getLong(_TIME)
             			));
             	
             } while (cursor.moveToNext());
@@ -287,7 +299,7 @@ public class DBHelper extends SQLiteOpenHelper {
             do {
             	String location = "";
             	
-            	for(int i=0;i<10;i++)
+            	for(int i=0;i<11;i++)
             		location += cursor.getString(i)+"|";
 
             	locationList.add(location);

@@ -61,19 +61,20 @@ public class LocationItem {
 		/*
 		 * Constructor for HistoryActivity
 		 */
-		public LocationItem(Context ctx, int synced, long runID, int run_type, long startTime, long endTime, int steps, float avgSpeed, float maxSpeed, float distance, double lat, double lng){		
+		public LocationItem(Context ctx, int synced, long runID, int run_type, long startDate, long endDate, int steps, float avgSpeed, float maxSpeed, float distance, double lat, double lng, long time){		
 			
 			this.runID = runID;
 			this.runType = run_type;
-			this.timeDate = convertToDateFormat(startTime);
-			this.date = convertToDate(startTime);
+			this.timeDate = convertToDateFormat(startDate);
+			this.date = convertToDate(startDate);
 			this.steps = steps;
 			this.speed = Math.round(maxSpeed * 3.6);
 			this.avgSpeed = Math.round(avgSpeed * 3.6);
 			this.distance = Math.round(distance);			
 			this.lat = lat;
 			this.lng = lng;	
-
+			this.time = time;
+			
 			this.locationDescription = getAddress(lat, lng, ctx);
 			
 			if(synced == 1)
@@ -86,7 +87,7 @@ public class LocationItem {
 		/*
 		 * Constructor for DbSync
 		 */
-		public LocationItem(long id, long run_id, int run_type, long time, int steps, float speed, float distance, double lat, double lng){
+		public LocationItem(long id, long run_id, int run_type, long date, int steps, float speed, float distance, double lat, double lng, long time){
 			this.id = id;
 			this.runID = run_id;
 			this.runType = run_type;
@@ -96,14 +97,14 @@ public class LocationItem {
 			this.distance = distance;
 			this.lat = lat;
 			this.lng = lng;	
-			this.timeDate = convertToDateFormatDB(time);
+			this.timeDate = convertToDateFormatDB(date);
 		}
 		
 		/*
 		 * Constructor for Map
 		 */
-		public LocationItem(long id, long time, float speed, float distance, double lat, double lng){
-			this.time = time;
+		public LocationItem(long id, long date, float speed, float distance, double lat, double lng){
+			this.date = convertToDateFormatDB(date);
 			this.speed = (float)Math.round(speed * 36) / 10;
 			this.distance = distance;
 			this.lat = lat;
