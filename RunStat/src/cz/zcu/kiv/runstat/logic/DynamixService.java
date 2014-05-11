@@ -1,10 +1,10 @@
 /***********************************************************************************************************************
  *
- * This file is part of the ${PROJECT_NAME} project
+ * This file is part of the RunStat project
 
  * ==========================================
  *
- * Copyright (C) ${YEAR} by University of West Bohemia (http://www.zcu.cz/en/)
+ * Copyright (C) 2014 by University of West Bohemia (http://www.zcu.cz/en/)
  *
  ***********************************************************************************************************************
  *
@@ -19,11 +19,11 @@
  *
  ***********************************************************************************************************************
  *
- * ${NAME}, ${YEAR}/${MONTH}/${DAY} ${HOUR}:${MINUTE} ${USER}
+ * Dream team, 2014/5/11  Tomáš Bouda
  *
  **********************************************************************************************************************/
 
-package cz.zcu.kiv.runstat.data;
+package cz.zcu.kiv.runstat.logic;
 
 import java.util.List;
 
@@ -39,20 +39,25 @@ import org.ambientdynamix.api.application.Result;
 import org.ambientdynamix.contextplugins.location.ILocationContextInfo;
 import org.ambientdynamix.contextplugins.pedometer.IPedometerStepInfo;
 
+import cz.zcu.kiv.runstat.db.DBHelper;
 import cz.zcu.kiv.runstat.ui.BasicrunActivity.RServiceRequestReceiver;
 import android.app.Service;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.SharedPreferences;
 import android.location.Location;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.preference.PreferenceManager;
 import android.util.Log;
 
-
-public class DynamixService extends Service
-{
+/*
+ * Service for getting position and steps
+ */
+public class DynamixService extends Service{
+	
 	// Classname for logging purposes
 	private final String TAG = this.getClass().getSimpleName();
 
@@ -60,13 +65,19 @@ public class DynamixService extends Service
 
 	private int runType = 0;
 	private boolean firstCall = true;
-
+	private boolean isFirstLocation = true;
+	
+	SharedPreferences sharedPref;
+	private boolean settingUseWifiProvider;
+	
+	
 	@Override
 	public IBinder onBind(Intent arg0)
 	{
 		return null;
 	}
 
+	
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId)
 	{
@@ -78,6 +89,7 @@ public class DynamixService extends Service
 		return START_NOT_STICKY;
 	}
 
+	
 	@Override
 	public void onCreate()
 	{
@@ -86,11 +98,14 @@ public class DynamixService extends Service
 		dx = new DynamixPlugin();
     
 		try {
+			sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
+			
 			bindService(new Intent(IDynamixFacade.class.getName()), dx.sConnection, Context.BIND_AUTO_CREATE);
-
+			
 		} catch (java.lang.SecurityException ex) {
 			Log.e(TAG, "Error while binding Dynamix");
 		}
+		
 	}
 
 	@Override
@@ -106,7 +121,9 @@ public class DynamixService extends Service
 			unbindService(dx.sConnection);
 			dx.dynamix = null;
 			dx = null;
-		
+			firstCall = true;
+			isFirstLocation = true;
+			
 		} catch (RemoteException e) {
 			e.printStackTrace();
 		}
@@ -115,6 +132,10 @@ public class DynamixService extends Service
 	} 
 
 
+	
+/*
+ * Dynamix class used for calling framework functions
+ */
 public class DynamixPlugin {
 
 	// Classname for logging purposes
@@ -122,16 +143,17 @@ public class DynamixPlugin {
 		
 	public IDynamixFacade dynamix;
 		
-	//DBHelper instance used for savind data to DB
+	//DBHelper instance used for saving data to DB
 	private DBHelper db = new DBHelper(getApplicationContext());
 	
 	//Variables
-	public int steps;
-	public double stepForce;
-	public double latitude;
-	public double longtitude;
-	public float speed;
-	public float distance;
+	private int steps;
+	private double stepForce;
+	
+	private double latitude;
+	private double longtitude;
+	private float speed;
+	private float distance;
 	
 	private double prevLat;
 	private double prevLng;
@@ -173,6 +195,106 @@ public class DynamixPlugin {
 		
 	}
     
+	/*
+	 * Called on location event
+	 */
+	private void locationEvent(ILocationContextInfo data){
+		
+		//First location is usually bad, so we wont save it in DB. This is caused by framework and can´t fix it.
+		if(!isFirstLocation){
+			settingUseWifiProvider = sharedPref.getBoolean("pref_key_usewifi", false);
+		
+			//Save location for calculating distance
+			prevLat = latitude;
+			prevLng = longtitude;
+	     
+			//get location
+			latitude = data.getLatitude();
+			longtitude = data.getLongitude();
+	     
+			//get current speed
+			speed = data.getSpeed();
+
+			//Calculate distance between two locations
+			if(prevLat!=0.0 && prevLng!=0.0){
+				Location prevLocation = new Location("");
+				prevLocation.setLatitude(prevLat);
+				prevLocation.setLongitude(prevLng);
+				Location myLocation = new Location("");
+				myLocation.setLatitude(latitude);
+				myLocation.setLongitude(longtitude);
+				distance += prevLocation.distanceTo(myLocation);
+	    	 
+			}else{
+				distance = 0;
+			}
+	     
+			provider = data.getProvider();	  
+			
+			//if wifi provider is enabled in settings or gps is available
+			if((settingUseWifiProvider && provider.equals("network")) || provider.equals("gps")){
+	    	 
+	    	 
+				//Save location to DB	    	 
+				db.addToDatabase(latitude, longtitude, runType, steps, speed, distance, firstCall);
+	    		 
+				//Send data to UI
+				broadcast();
+	     
+				//Lock run_id
+				firstCall = false;
+	    	 
+				isFirstLocation = false;
+			}
+		}
+		
+		isFirstLocation = false;
+	}
+	
+	/*
+	 * Called on pedometer event
+	 */
+	private void pedometerEvent(IPedometerStepInfo data){
+		
+		settingUseWifiProvider = sharedPref.getBoolean("pref_key_usewifi", false);
+		
+		stepForce = data.getRmsStepForce();
+		
+		if(stepForce>=1.0)
+			steps++;		
+		
+		Log.d(TAG, "Kroky:" + steps);
+		
+		if((settingUseWifiProvider && provider.equals("network")) || provider.equals("gps")){
+			broadcast();
+		}
+	}
+	
+	
+	/*
+	 * Sends broadcast to Activity
+	 */
+	private void broadcast(){
+		
+		Intent broadcastIntent = new Intent();
+        broadcastIntent.setAction(RServiceRequestReceiver.PROCESS_RESPONSE);
+        broadcastIntent.addCategory(Intent.CATEGORY_DEFAULT);
+
+        broadcastIntent.putExtra("DxSteps", this.steps);
+        broadcastIntent.putExtra("DxLat", this.latitude);
+        broadcastIntent.putExtra("DxLng", this.longtitude);
+        broadcastIntent.putExtra("DxSpeed", this.speed);
+        broadcastIntent.putExtra("DxDistance", this.distance);
+        broadcastIntent.putExtra("DxProvider", this.provider);
+
+        sendBroadcast(broadcastIntent);
+	}
+	
+	
+	/*
+	 * Methods of dynamix framework, don't change!
+	 */
+	
 	public ServiceConnection sConnection = new ServiceConnection() {
 		/*
 		 * Indicates that we've successfully connected to Dynamix. During this call, we transform the incoming IBinder
@@ -334,15 +456,8 @@ public class DynamixPlugin {
 				if (nativeInfo instanceof IPedometerStepInfo) {
 					IPedometerStepInfo stepInfo = (IPedometerStepInfo) nativeInfo;
 					Log.i(TAG, "Received IPedometerStepInfo with RmsStepForce: " + stepInfo.getRmsStepForce());
-					
-					stepForce = stepInfo.getRmsStepForce();
-					
-					if(stepForce>=1.0)
-						steps++;		
-					
-					Log.d(TAG, "Kroky:" + steps);
-					
-					broadcast();
+
+					pedometerEvent(stepInfo);
 				}
 				
 				// Example of using Location
@@ -350,41 +465,8 @@ public class DynamixPlugin {
 			          ILocationContextInfo data = (ILocationContextInfo) nativeInfo;
 			          Log.i(TAG, "Received ILocationContextInfo with location: " + data.getLatitude() + ":" + data.getLongitude());
 			     
-			     //Save location for calculating distance
-			     prevLat = latitude;
-			     prevLng = longtitude;
-			     
-			     //get location
-			     latitude = data.getLatitude();
-			     longtitude = data.getLongitude();
-			     
-			     //get current speed
-			     speed = data.getSpeed();
-			     
-			     //Calculate distance between two locations
-			     if(prevLat!=0.0 && prevLng!=0.0){
-			    	 Location prevLocation = new Location("");
-			    	 prevLocation.setLatitude(prevLat);
-			    	 prevLocation.setLongitude(prevLng);
-			    	 Location myLocation = new Location("");
-			    	 myLocation.setLatitude(latitude);
-			    	 myLocation.setLongitude(longtitude);
-			    	 distance += prevLocation.distanceTo(myLocation);
-			    	 
-			     }else{
-			    	 distance = 0;
-			     }
-			     
-			     provider = data.getProvider();	  
-
-			     //Save location to DB
-			     db.addToDatabase(Double.toString(latitude), Double.toString(longtitude), runType, steps, Float.toString(speed),Float.toString(distance), firstCall);
-			     
-			     //Send data to UI
-			     broadcast();
-			     
-			     //Lock run_id
-			     firstCall = false;
+			    
+			          locationEvent(data);
 				}
 
 			} else
@@ -458,26 +540,7 @@ public class DynamixPlugin {
 			Log.w(TAG, "Request failed! Message: " + result.getMessage() + " | Error code: " + result.getErrorCode());
 		}
 	}
-
-	/*
-	 * Sends broadcast to Activity
-	 */
-	private void broadcast(){
-		
-		Intent broadcastIntent = new Intent();
-        broadcastIntent.setAction(RServiceRequestReceiver.PROCESS_RESPONSE);
-        broadcastIntent.addCategory(Intent.CATEGORY_DEFAULT);
-        
-        broadcastIntent.putExtra("DxSteps", this.steps);
-        broadcastIntent.putExtra("DxLat", this.latitude);
-        broadcastIntent.putExtra("DxLng", this.longtitude);
-        broadcastIntent.putExtra("DxSpeed", this.speed);
-        broadcastIntent.putExtra("DxDistance", this.distance);
-        broadcastIntent.putExtra("DxProvider", this.provider);
-        
-        sendBroadcast(broadcastIntent);
-	}
-		
+	
 }
 
 }

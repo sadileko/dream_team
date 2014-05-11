@@ -1,10 +1,10 @@
 /***********************************************************************************************************************
  *
- * This file is part of the ${PROJECT_NAME} project
+ * This file is part of the RunStat project
 
  * ==========================================
  *
- * Copyright (C) ${YEAR} by University of West Bohemia (http://www.zcu.cz/en/)
+ * Copyright (C) 2014 by University of West Bohemia (http://www.zcu.cz/en/)
  *
  ***********************************************************************************************************************
  *
@@ -19,7 +19,7 @@
  *
  ***********************************************************************************************************************
  *
- * ${NAME}, ${YEAR}/${MONTH}/${DAY} ${HOUR}:${MINUTE} ${USER}
+ * Dream team, 2014/5/11  Tomáš Bouda
  *
  **********************************************************************************************************************/
 
@@ -47,6 +47,11 @@ public class HelpActivity extends Activity {
 		setContentView(R.layout.activity_help);
 		Log.d(TAG, "onCreate()");
 		
+		/*
+		 * Buttons
+		 */
+		
+		//Button back
 		final Button btnBackHelp = (Button) findViewById(R.id.btnBackHelp);
 		btnBackHelp.setOnClickListener(new OnClickListener() {
 				@Override

@@ -1,10 +1,10 @@
 /***********************************************************************************************************************
  *
- * This file is part of the ${PROJECT_NAME} project
+ * This file is part of the RunStat project
 
  * ==========================================
  *
- * Copyright (C) ${YEAR} by University of West Bohemia (http://www.zcu.cz/en/)
+ * Copyright (C) 2014 by University of West Bohemia (http://www.zcu.cz/en/)
  *
  ***********************************************************************************************************************
  *
@@ -19,16 +19,17 @@
  *
  ***********************************************************************************************************************
  *
- * ${NAME}, ${YEAR}/${MONTH}/${DAY} ${HOUR}:${MINUTE} ${USER}
+ * Dream team, 2014/5/11  Tomáš Bouda
  *
  **********************************************************************************************************************/
 
-package cz.zcu.kiv.runstat.data;
+package cz.zcu.kiv.runstat.db;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import cz.zcu.kiv.runstat.logic.LocationItem;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
@@ -48,19 +49,37 @@ public class DBHelper extends SQLiteOpenHelper {
 	// Table name
 	public static final String TABLE = "location";
 
-	// Columns
-	public static final String TIME = "time";
+	// Columns names
+	public static final String DATE = "date";
 	public static final String LONGITUDE = "longtitude";
 	public static final String LATITUDE = "latitude";
 	public static final String STEPS = "steps";
 	public static final String SPEED = "speed";
 	public static final String DISTANCE = "distance";
-	public static final String TYPE = "type";			//Typ bìhu, 0 - zakladni, 1 - distancni, 2 - casovy
-	public static final String RUN_ID = "run_id";	//Id bìhu
-	public static final String SYNC = "sync";
+	public static final String TYPE = "type";			//Runtype, 0 - basic, 1 - distance, 2 - time
+	public static final String RUN_ID = "run_id";	//Id of running
+	public static final String SYNC = "sync";		//marks if the record is on server
+	public static final String TIME = "time";
+	
+	/*
+	 * Columns position
+	 */
+	private final int ID = 			0;
+	private final int _RUNID = 		1;
+	private final int _RUNTYPE = 	2;
+	private final int _SYNC = 		3;
+	private final int _DATE = 		4;
+	private final int _STEPS = 		5;
+	private final int _SPEED = 		6;
+	private final int _DISTANCE =	7;
+	private final int _LAT = 		8;
+	private final int _LNG = 		9;
+	private final int _TIME=		10;
 	
 	private long lastRowID = 1;
 	private Context ctx;
+	
+	private long startTime = 0;
 	
 	public DBHelper(Context context) {
 		super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -73,8 +92,8 @@ public class DBHelper extends SQLiteOpenHelper {
 	public void onCreate(SQLiteDatabase db) {
 		
 		String sql = "create table " + TABLE + "( " + BaseColumns._ID
-				+ " integer primary key autoincrement, " + RUN_ID + " integer," + TYPE + " integer,"+ SYNC + " integer," + TIME + " integer, "
-				+ STEPS + " integer, "+ SPEED +" text,"+ DISTANCE+ " text," + LATITUDE + " text, " + LONGITUDE + " text);";
+				+ " integer primary key autoincrement, " + RUN_ID + " integer," + TYPE + " integer,"+ SYNC + " integer," + DATE + " integer, "
+				+ STEPS + " integer, "+ SPEED +" real,"+ DISTANCE+ " real," + LATITUDE + " real, " + LONGITUDE + " real,"+ TIME + " integer);";
 		
 		db.execSQL(sql);
 		Log.i(TAG, "Created DB: "+sql);
@@ -93,23 +112,29 @@ public class DBHelper extends SQLiteOpenHelper {
 	/*
 	 * Add location to DB
 	 */
-	public void addToDatabase(String lat, String lng, int type, int steps, String speed, String distance, boolean firstCall) {
+	public void addToDatabase(double lat, double lng, int type, int steps, float speed, float distance, boolean firstCall) {
 		SQLiteDatabase db = this.getWritableDatabase();
 		ContentValues values = new ContentValues();
 				
 		if(firstCall){
-			lastRowID = getLastRowId() + 1; 
+			lastRowID = getLastRowId() + 1;
+			startTime = System.currentTimeMillis();
 		}
 		
 		values.put(RUN_ID, lastRowID);
 		values.put(TYPE, type);
 		values.put(SYNC, 0);
-		values.put(TIME, System.currentTimeMillis());
+		values.put(DATE, System.currentTimeMillis());
 		values.put(STEPS, steps);
 		values.put(SPEED, speed);
 		values.put(DISTANCE, distance);
 		values.put(LATITUDE, lat);
 		values.put(LONGITUDE, lng);
+		
+		if(firstCall)
+			values.put(TIME, 0);
+		else
+			values.put(TIME, System.currentTimeMillis()-startTime);
 		
 		
 		db.insert(TABLE, null, values);
@@ -121,19 +146,21 @@ public class DBHelper extends SQLiteOpenHelper {
 	/*
 	 * Get last row runID
 	 */
-	public long getLastRowId(){
+	public long getLastRowId(){	
 		
-		
-		String selectQuery = "SELECT  * FROM " + TABLE;
+		String selectQuery = "SELECT MAX(run_id) FROM " + TABLE;
 		 
         SQLiteDatabase db = this.getWritableDatabase();
         Cursor cursor = db.rawQuery(selectQuery, null);
         
-        long lastRow = 0;
-        if(cursor.getCount()>0){
+        long lastRow = 1;
+        
+        if( cursor.getCount() > 0 ){
         	cursor.moveToLast();
-        	lastRow = cursor.getInt(1);
+        	lastRow = cursor.getLong(0);
         }
+        
+        Log.d(TAG,"lastrow: "+lastRow);
         
         return lastRow;
 	}
@@ -142,13 +169,30 @@ public class DBHelper extends SQLiteOpenHelper {
 	/*
 	 * Get locations by given runId
 	 */
-	public Cursor getLocationsByRunId(long runID){
+	public List<LocationItem> getLocationsByRunId(long runID){
 		String selectQuery = "SELECT  * FROM " + TABLE + " WHERE run_id="+runID;
-		 
+		
+		List<LocationItem> locations = new ArrayList<LocationItem>();
+		
         SQLiteDatabase db = this.getWritableDatabase();
         Cursor cursor = db.rawQuery(selectQuery, null);
         
-        return cursor;
+        while (cursor.moveToNext()) {	
+
+			locations.add(new LocationItem(
+					cursor.getLong(ID),
+					cursor.getLong(_DATE), 
+					cursor.getFloat(_SPEED),
+					cursor.getFloat(_DISTANCE),
+					cursor.getDouble(_LAT),
+					cursor.getDouble(_LNG)
+					));
+						
+		}
+        
+        db.close();
+        
+        return locations;
 	}
 	
 	
@@ -159,7 +203,7 @@ public class DBHelper extends SQLiteOpenHelper {
 			removeSingleMarkerLocations();
 		
 			List<LocationItem> locationsList = new ArrayList<LocationItem>();
-	        String selectQuery = "SELECT MIN(sync), run_id, type, MIN(time), MAX(time), MAX(steps), AVG(speed), MAX(speed), MAX(distance), latitude, longtitude FROM "+TABLE+" GROUP BY run_id";
+	        String selectQuery = "SELECT MIN(sync), run_id, type, MIN(date), MAX(date), MAX(steps), AVG(speed), MAX(speed), MAX(distance), latitude, longtitude, MAX(time) FROM "+TABLE+" GROUP BY run_id;";
 	 
 	        SQLiteDatabase db = this.getWritableDatabase();
 	        Cursor cursor = db.rawQuery(selectQuery, null);
@@ -167,6 +211,7 @@ public class DBHelper extends SQLiteOpenHelper {
 	        if (cursor.moveToFirst()) {
 	            do {
 	            	locationsList.add( new LocationItem(
+	            			ctx,
 	            			cursor.getInt(0),
 	            			cursor.getLong(1),
 	            			cursor.getInt(2),
@@ -177,17 +222,20 @@ public class DBHelper extends SQLiteOpenHelper {
 	            			cursor.getFloat(7),
 	            			cursor.getFloat(8),
 	            			cursor.getDouble(9),
-	            			cursor.getDouble(10)
-	            			));	            	
+	            			cursor.getDouble(10),
+	            			cursor.getLong(11)
+	            			));	        
 	            } while (cursor.moveToNext());
 	        }
+	        
+	        db.close();
 	        
 	        return locationsList;
 	}
 	
 	
 	/*
-	 * 
+	 * Get locations as list of LocationItems for DbSync
 	 */
 	public List<LocationItem> getAllLocationsAsList(){
 		removeSingleMarkerLocations();	//clean up DB before synchronize
@@ -202,29 +250,41 @@ public class DBHelper extends SQLiteOpenHelper {
             do {
             	
             	locationsList.add(new LocationItem(
-            			cursor.getLong(0),
-            			cursor.getLong(1),
-            			cursor.getInt(2),
-            			cursor.getLong(4),
-            			cursor.getInt(5),
-            			cursor.getFloat(6),
-            			cursor.getFloat(7),
-            			cursor.getDouble(8),
-            			cursor.getDouble(9)
+            			cursor.getLong(ID),
+            			cursor.getLong(_RUNID),
+            			cursor.getInt(_RUNTYPE),
+            			cursor.getLong(_DATE),
+            			cursor.getInt(_STEPS),
+            			cursor.getFloat(_SPEED),
+            			cursor.getFloat(_DISTANCE),
+            			cursor.getDouble(_LAT),
+            			cursor.getDouble(_LNG),
+            			cursor.getLong(_TIME)
             			));
             	
             } while (cursor.moveToNext());
         }
         
-        selectQuery = "UPDATE "+TABLE+" SET sync='1' WHERE sync='0'";
-        db.execSQL(selectQuery);
+        db.close();
         
         return locationsList;
 	}
 	
+	/*
+	 * Mark location in DB as synchronized
+	 */
+	public void markAsSynchronized(long id){
+		SQLiteDatabase db = this.getWritableDatabase();
+		
+		String updateQuery = "UPDATE "+TABLE+" SET sync='1' WHERE sync='0' AND _id='"+id+"'";
+        db.execSQL(updateQuery);
+        
+        db.close();
+	}
+	
 	
 	/*
-	 * Returns all locations from DB as list of strings - for log
+	 * Returns all locations from DB as list of strings - for logging
 	 */
 	public List<String> getAllLocations() {
         List<String> locationList = new ArrayList<String>();
@@ -239,14 +299,15 @@ public class DBHelper extends SQLiteOpenHelper {
             do {
             	String location = "";
             	
-            	for(int i=0;i<10;i++)
+            	for(int i=0;i<11;i++)
             		location += cursor.getString(i)+"|";
 
             	locationList.add(location);
             } while (cursor.moveToNext());
         }
  
-        // return contact list
+        db.close();
+
         return locationList;
     }
 	
@@ -258,6 +319,8 @@ public class DBHelper extends SQLiteOpenHelper {
 	public void removeAllLocations(){
 		SQLiteDatabase db = this.getWritableDatabase();
 	    db.delete(TABLE, null, null);
+	    
+	    db.close();
 	}
 	
 	
@@ -270,6 +333,8 @@ public class DBHelper extends SQLiteOpenHelper {
 		
 		db.execSQL(deleteQuery);
 		Log.i(TAG, "RunId: " + runID + " deleted succesfully.");
+		
+		db.close();
 	}
 	
 	
@@ -299,6 +364,45 @@ public class DBHelper extends SQLiteOpenHelper {
         }
   
         db.close();
+	}
+	
+	
+	/*
+	 * Removes locations where distance is less than 1m
+	 */
+	public void removeZeroDistanceLocations(){
+		String selectQuery = "SELECT run_id, MAX(distance) FROM "+TABLE+" GROUP BY run_id";
+		String deleteQuery = "DELETE FROM "+TABLE+" WHERE "; 
+		
+		SQLiteDatabase db = this.getWritableDatabase();
+        Cursor cursor = db.rawQuery(selectQuery, null);
+
+        boolean executable = false;
+        
+		if(cursor.getCount()>0){
+        	
+        	if (cursor.moveToFirst()) {
+        	   do {
+        		   
+        		   if(cursor.getFloat(1) < 1){
+        			   
+        			   if(cursor.isLast()){
+        				   deleteQuery += "run_id='" + cursor.getLong(0) + "'";
+        			   }else{
+        				   deleteQuery += "run_id='" + cursor.getLong(0) + "' OR ";
+        			   }
+        			   
+        			   executable = true;
+        		   }
+        		   
+        	   } while (cursor.moveToNext());
+        	}
+        	
+        	if(executable)
+        		db.execSQL(deleteQuery);
+        }
+		
+		db.close();
 	}
 
 }

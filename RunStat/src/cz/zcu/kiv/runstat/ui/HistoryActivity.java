@@ -1,10 +1,10 @@
 /***********************************************************************************************************************
  *
- * This file is part of the ${PROJECT_NAME} project
+ * This file is part of the RunStat project
 
  * ==========================================
  *
- * Copyright (C) ${YEAR} by University of West Bohemia (http://www.zcu.cz/en/)
+ * Copyright (C) 2014 by University of West Bohemia (http://www.zcu.cz/en/)
  *
  ***********************************************************************************************************************
  *
@@ -19,7 +19,7 @@
  *
  ***********************************************************************************************************************
  *
- * ${NAME}, ${YEAR}/${MONTH}/${DAY} ${HOUR}:${MINUTE} ${USER}
+ * Dream team, 2014/5/11  Tomáš Bouda
  *
  **********************************************************************************************************************/
 
@@ -29,15 +29,14 @@ import java.io.IOException;
 import java.util.List;
 
 import cz.zcu.kiv.runstat.R;
-import cz.zcu.kiv.runstat.data.DBHelper;
-import cz.zcu.kiv.runstat.data.LocationItem;
+import cz.zcu.kiv.runstat.db.DBHelper;
+import cz.zcu.kiv.runstat.logic.LocationItem;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -45,16 +44,12 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.BaseAdapter;
-import android.widget.CheckBox;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-/**
- * @author Pranay Airan
- * 
- */
+
 public class HistoryActivity extends Activity {
 
 	
@@ -179,22 +174,37 @@ public class HistoryActivity extends Activity {
 			TextView locationAvgSpeed = (TextView)arg1.findViewById(R.id.txtHistoryAvgSpeed);
 			TextView locationMaxSpeed = (TextView)arg1.findViewById(R.id.txtHistoryMaxSpeed);
 			TextView locationDuration = (TextView)arg1.findViewById(R.id.txtHistoryDuration);
+			TextView locationDate = (TextView)arg1.findViewById(R.id.txtHistoryDate);
 			ImageView synced = (ImageView)arg1.findViewById(R.id.imgSynced);
 			
 			LocationItem locItem = locationList.get(arg0);
 
-			locationName.setText(locItem.timeDate);
-			locationDesc.setText("run_id: "+locItem.runID);
+			locationName.setText(locItem.locationDescription + " - " + locItem.date);
+			
+			switch(locItem.runType){
+				case 0:
+					locationDesc.setText("Type: Basic");
+					break;
+				case 1:
+					locationDesc.setText("Type: Distance");
+					break;
+				case 2:
+					locationDesc.setText("Type: Time");
+					break;
+			}
+			
+			
 			locationDistance.setText("Distance: "+locItem.distance+" m");
 			locationAvgSpeed.setText("Average speed: "+locItem.avgSpeed+" km/h");
 			locationMaxSpeed.setText("Max. speed: "+locItem.speed+" km/h");
-			locationDuration.setText(" "+locItem.locationDescription);
+			locationDate.setText("Date: "+locItem.timeDate);
+			locationDuration.setText("Duration: "+millsToTime(locItem.time));
 			
 			if(locItem.synchronyzed){
-				synced.setVisibility(synced.VISIBLE);
+				synced.setVisibility(View.VISIBLE);
 			}else
 			{
-				synced.setVisibility(synced.INVISIBLE);
+				synced.setVisibility(View.INVISIBLE);
 			}
 			
 			
@@ -208,14 +218,27 @@ public class HistoryActivity extends Activity {
 
     }
     
+    private String millsToTime(long mills){
+    	int seconds = (int) (mills / 1000) % 60 ;
+    	int minutes = (int) ((mills / (1000*60)) % 60);
+    	int hours   = (int) ((mills / (1000*60*60)) % 24);
+    	
+    	 String time = String.format("%dh,%dm,%ds", 
+    			 hours,
+    			 minutes,	
+    			 seconds						    		    
+	    		);
+    	 
+    	 return time;
+    }
     
     public List<LocationItem> getDataForListView() throws IOException
     {
     	DBHelper dbh = new DBHelper(getApplicationContext());
     	List<LocationItem> locationsList = dbh.getRunningEvents();
-
     	
     	return locationsList;
     	
     }
-}
+}	
+	

@@ -37,6 +37,8 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.media.AudioManager;
+import android.media.ToneGenerator;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.os.Handler;
@@ -47,14 +49,18 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.CheckBox;
+import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 
-public class BasicrunActivity extends Activity {
+public class DistancerunActivity extends Activity {
 	
 		// Classname for logging purposes
 		private final String TAG = this.getClass().getSimpleName();
@@ -74,6 +80,7 @@ public class BasicrunActivity extends Activity {
 		public float distance = 0;
 		public String provider = "";
 		boolean settingsUseWifi;
+		float distanceGoal = 1;
 		
 		//View
 		private Handler myHandler;
@@ -84,6 +91,10 @@ public class BasicrunActivity extends Activity {
 		private CheckBox chckLocated;
 		private TextView  txtProvider;
 		private ProgressBar pBar;
+		private EditText txtSetDistance;
+		private RelativeLayout formInfo;
+		private RelativeLayout formSetDistance;
+		private RelativeLayout formLocationInfo;
 		
 		/*
 		 * Activity lifecycle
@@ -92,7 +103,7 @@ public class BasicrunActivity extends Activity {
 		@Override
 		protected void onCreate(Bundle savedInstanceState) {
 			super.onCreate(savedInstanceState);
-			setContentView(R.layout.activity_basicrun);
+			setContentView(R.layout.activity_distancerun);
 			Log.d(TAG,"onCreate()");			
 				
 			sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
@@ -106,6 +117,10 @@ public class BasicrunActivity extends Activity {
 			txtProvider = (TextView) findViewById(R.id.txtProvider);			
 			chckLocated = (CheckBox) findViewById(R.id.chckLocated);							
 			pBar = (ProgressBar) findViewById(R.id.pBar);
+			txtSetDistance = (EditText) findViewById(R.id.txtSetHours);
+			formInfo = (RelativeLayout) findViewById(R.id.formInfo);
+			formSetDistance = (RelativeLayout) findViewById(R.id.formSetDistance);
+			formLocationInfo = (RelativeLayout) findViewById(R.id.formLocationInfo);
 			
 			//Handler for refreshing UI
 			myHandler = new Handler();
@@ -117,8 +132,6 @@ public class BasicrunActivity extends Activity {
 			receiver = new RServiceRequestReceiver();
 	        registerReceiver(receiver, filter);
 	        
-	        //Start dynamix service
-	        startRService();
 	        
 	        //Message box 
 	        builder = new AlertDialog.Builder(this);
@@ -130,7 +143,7 @@ public class BasicrunActivity extends Activity {
 	    	    public void onClick(DialogInterface dialog, int which) {
 	    	    	
 	    	    	//Stop service and finish activity
-	    	    	stopRService();	    	    	
+	    	    	//stopRService();	    	    	
 	    	    	finish();    	    	
 	    	    }
 	    	})
@@ -142,11 +155,41 @@ public class BasicrunActivity extends Activity {
 			 */
 	    	
 	    	//Close application
-			final Button btnEnd = (Button) findViewById(R.id.btnEnd);
+	    	final Button btnEnd = (Button) findViewById(R.id.btnEnd);
 			btnEnd.setOnClickListener(new OnClickListener() {
 					@Override
 					public void onClick(View v) {
-							builder.show();									
+						builder.show();							
+					}
+			});
+	    	
+			//Set distance and start running
+			final Button btnSetDistance = (Button) findViewById(R.id.btnSetTime);
+			btnSetDistance.setOnClickListener(new OnClickListener() {
+					@Override
+					public void onClick(View v) {
+						try{
+							distanceGoal = Float.parseFloat( txtSetDistance.getText().toString() );
+						
+							
+							if(distanceGoal > 0){
+								formInfo.setVisibility(View.VISIBLE);
+								formLocationInfo.setVisibility(View.VISIBLE);
+								formSetDistance.setVisibility(View.INVISIBLE);
+								
+								
+								InputMethodManager imm = (InputMethodManager) getSystemService(Activity.INPUT_METHOD_SERVICE);
+							    imm.toggleSoftInput(InputMethodManager.HIDE_IMPLICIT_ONLY, 0);
+							    
+								startRService();
+							}
+							else{
+								Toast.makeText(getApplicationContext(), "Distance can't be zero!", Toast.LENGTH_SHORT).show();
+							}
+							
+						}catch(NumberFormatException e){
+							Toast.makeText(getApplicationContext(), "Invalid number!", Toast.LENGTH_SHORT).show();
+						}
 					}
 			});
 						
@@ -155,7 +198,7 @@ public class BasicrunActivity extends Activity {
 			btnHelp.setOnClickListener(new OnClickListener() {
 					@Override
 					public void onClick(View v) {
-						Intent intent = new Intent(BasicrunActivity.this, HelpActivity.class); 
+						Intent intent = new Intent(DistancerunActivity.this, HelpActivity.class); 
 						startActivityForResult(intent, 0);									
 					}
 			});
@@ -210,8 +253,8 @@ public class BasicrunActivity extends Activity {
 		 */
 		public void startRService(){
 			Log.d(TAG, "startRService()");
-			Intent intent = new Intent(BasicrunActivity.this, DynamixService.class); 
-			intent.putExtra("runType", 0);
+			Intent intent = new Intent(DistancerunActivity.this, DynamixService.class); 
+			intent.putExtra("runType", 1);
 			startService(intent); 		
 		}
 
@@ -222,7 +265,7 @@ public class BasicrunActivity extends Activity {
 		public void stopRService()
 		{
 			Log.d(TAG, "stopRService()");
-			Intent intent = new Intent(BasicrunActivity.this, DynamixService.class);		
+			Intent intent = new Intent(DistancerunActivity.this, DynamixService.class);		
 			stopService(intent);
 		}
 		
@@ -239,25 +282,41 @@ public class BasicrunActivity extends Activity {
 				   
 				   if(settingsProvider.contains("gps") || (wifi.isWifiEnabled() && settingsUseWifi)){
 					   
-					   if(settingsProvider.contains("gps"))
-						   settingsProvider = "gps";
+					   if(distance < distanceGoal){
+						   
+						   if(settingsProvider.contains("gps"))
+							   settingsProvider = "gps";
 					   
-					   txtSteps.setText("(Aprox. " + steps + " steps)");
+						   txtSteps.setText("(Aprox. " + steps + " steps)");
 				       
-				       //convert meters to km per hours and round the value
-				       float roundedSpeed= (float)Math.round(speed * 36) / 10;
-				       txtCurrentSpeed.setText("" + roundedSpeed);
+						   //convert meters to km per hours and round the value
+						   float roundedSpeed= (float)Math.round(speed * 36) / 10;
+						   txtCurrentSpeed.setText("" + roundedSpeed);
 				       
-				       txtDistance.setText(""+ Math.round(distance) +" m");
+						   txtDistance.setText(""+ Math.round(distance) +"/"+distanceGoal+" m");
 				       
-				       txtProvider.setText("Provider: " + settingsProvider); 
+						   txtProvider.setText("Provider: " + settingsProvider); 
+						   
+					   }else	//END of running
+					   {						   
+						   stopRService();
+						   myHandler.removeCallbacks(stepsUpdate);
+						   txtDistance.setText(""+ Math.round(distanceGoal) +"/"+distanceGoal+" m");
+						   TextView txtFinalMessage = (TextView) findViewById(R.id.txtFinalMessage);
+						   txtFinalMessage.setText("You passed the distance.");
+						   Toast.makeText(getApplicationContext(), "You passed the distance.", Toast.LENGTH_SHORT).show();
+						   ToneGenerator toneG = new ToneGenerator(AudioManager.STREAM_ALARM, 1000);
+						   toneG.startTone(ToneGenerator.TONE_CDMA_ALERT_CALL_GUARD, 1000); 
+					   }
 				        
 				   }else
 				   {
 					   txtProvider.setText("Please turn GPS on, or turn wifi on and allow it in settings."); 
 				   }
-   				          			     
-			       myHandler.postDelayed(this, 250);
+				   
+				   
+				   if(distance < distanceGoal)  
+					   myHandler.postDelayed(this, 250);
 			    }
 		};
 
