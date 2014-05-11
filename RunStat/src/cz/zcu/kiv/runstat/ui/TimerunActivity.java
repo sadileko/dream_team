@@ -39,6 +39,7 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
+import android.os.CountDownTimer;
 import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.provider.Settings;
@@ -47,14 +48,18 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.CheckBox;
+import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 
-public class BasicrunActivity extends Activity {
+public class TimerunActivity extends Activity {
 	
 		// Classname for logging purposes
 		private final String TAG = this.getClass().getSimpleName();
@@ -74,6 +79,9 @@ public class BasicrunActivity extends Activity {
 		public float distance = 0;
 		public String provider = "";
 		boolean settingsUseWifi;
+		boolean doOnce = true;
+		int hours = 0;
+		int minutes = 0;
 		
 		//View
 		private Handler myHandler;
@@ -81,9 +89,15 @@ public class BasicrunActivity extends Activity {
 		private TextView txtSteps;	
 		private TextView txtCurrentSpeed;
 		private TextView txtDistance;
+		private TextView txtTime;
 		private CheckBox chckLocated;
 		private TextView  txtProvider;
 		private ProgressBar pBar;
+		private EditText txtSetHours;
+		private EditText txtSetMinutes;
+		private RelativeLayout formInfo;
+		private RelativeLayout formSetDistance;
+		private RelativeLayout formLocationInfo;
 		
 		/*
 		 * Activity lifecycle
@@ -92,7 +106,7 @@ public class BasicrunActivity extends Activity {
 		@Override
 		protected void onCreate(Bundle savedInstanceState) {
 			super.onCreate(savedInstanceState);
-			setContentView(R.layout.activity_basicrun);
+			setContentView(R.layout.activity_timerun);
 			Log.d(TAG,"onCreate()");			
 				
 			sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
@@ -106,6 +120,12 @@ public class BasicrunActivity extends Activity {
 			txtProvider = (TextView) findViewById(R.id.txtProvider);			
 			chckLocated = (CheckBox) findViewById(R.id.chckLocated);							
 			pBar = (ProgressBar) findViewById(R.id.pBar);
+			txtSetHours = (EditText) findViewById(R.id.txtSetHours);
+			txtSetMinutes = (EditText) findViewById(R.id.txtSetMinutes);
+			txtTime = (TextView) findViewById(R.id.txtTime);
+			formInfo = (RelativeLayout) findViewById(R.id.formInfo);
+			formSetDistance = (RelativeLayout) findViewById(R.id.formSetDistance);
+			formLocationInfo = (RelativeLayout) findViewById(R.id.formLocationInfo);
 			
 			//Handler for refreshing UI
 			myHandler = new Handler();
@@ -117,8 +137,6 @@ public class BasicrunActivity extends Activity {
 			receiver = new RServiceRequestReceiver();
 	        registerReceiver(receiver, filter);
 	        
-	        //Start dynamix service
-	        startRService();
 	        
 	        //Message box 
 	        builder = new AlertDialog.Builder(this);
@@ -129,8 +147,7 @@ public class BasicrunActivity extends Activity {
 	    	.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
 	    	    public void onClick(DialogInterface dialog, int which) {
 	    	    	
-	    	    	//Stop service and finish activity
-	    	    	stopRService();	    	    	
+	    	    	//finish activity	    	    	
 	    	    	finish();    	    	
 	    	    }
 	    	})
@@ -142,11 +159,50 @@ public class BasicrunActivity extends Activity {
 			 */
 	    	
 	    	//Close application
-			final Button btnEnd = (Button) findViewById(R.id.btnEnd);
+	    	final Button btnEnd = (Button) findViewById(R.id.btnEnd);
 			btnEnd.setOnClickListener(new OnClickListener() {
 					@Override
 					public void onClick(View v) {
-							builder.show();									
+						builder.show();							
+					}
+			});
+	    	
+			//Set distance and start running
+			final Button btnSetDistance = (Button) findViewById(R.id.btnSetTime);
+			btnSetDistance.setOnClickListener(new OnClickListener() {
+					@Override
+					public void onClick(View v) {
+						try{
+							if(!txtSetHours.getText().toString().equals(""))
+								hours = Integer.parseInt(txtSetHours.getText().toString());
+							else
+								hours = 0;
+							if(!txtSetMinutes.getText().toString().equals(""))
+								minutes = Integer.parseInt(txtSetMinutes.getText().toString());
+							else
+								minutes = 0;
+							
+							if(hours > 0 || minutes > 0){
+								formInfo.setVisibility(View.VISIBLE);
+								formLocationInfo.setVisibility(View.VISIBLE);
+								txtTime.setVisibility(View.VISIBLE);
+								formSetDistance.setVisibility(View.INVISIBLE);
+								
+								
+								//Hide keyboard
+								InputMethodManager imm = (InputMethodManager) getSystemService(Activity.INPUT_METHOD_SERVICE);
+							    imm.toggleSoftInput(InputMethodManager.HIDE_IMPLICIT_ONLY, 0);
+							    
+								startRService();
+  
+							}
+							else{
+								Toast.makeText(getApplicationContext(), "Time can't be zero!", Toast.LENGTH_SHORT).show();
+							}
+							
+						}catch(NumberFormatException e){
+							Toast.makeText(getApplicationContext(), "Invalid number!", Toast.LENGTH_SHORT).show();
+						}
 					}
 			});
 						
@@ -155,7 +211,7 @@ public class BasicrunActivity extends Activity {
 			btnHelp.setOnClickListener(new OnClickListener() {
 					@Override
 					public void onClick(View v) {
-						Intent intent = new Intent(BasicrunActivity.this, HelpActivity.class); 
+						Intent intent = new Intent(TimerunActivity.this, HelpActivity.class); 
 						startActivityForResult(intent, 0);									
 					}
 			});
@@ -210,8 +266,8 @@ public class BasicrunActivity extends Activity {
 		 */
 		public void startRService(){
 			Log.d(TAG, "startRService()");
-			Intent intent = new Intent(BasicrunActivity.this, DynamixService.class); 
-			intent.putExtra("runType", 0);
+			Intent intent = new Intent(TimerunActivity.this, DynamixService.class); 
+			intent.putExtra("runType", 2);	//set run type to time
 			startService(intent); 		
 		}
 
@@ -222,7 +278,7 @@ public class BasicrunActivity extends Activity {
 		public void stopRService()
 		{
 			Log.d(TAG, "stopRService()");
-			Intent intent = new Intent(BasicrunActivity.this, DynamixService.class);		
+			Intent intent = new Intent(TimerunActivity.this, DynamixService.class);		
 			stopService(intent);
 		}
 		
@@ -239,25 +295,27 @@ public class BasicrunActivity extends Activity {
 				   
 				   if(settingsProvider.contains("gps") || (wifi.isWifiEnabled() && settingsUseWifi)){
 					   
-					   if(settingsProvider.contains("gps"))
-						   settingsProvider = "gps";
+						   if(settingsProvider.contains("gps"))
+							   settingsProvider = "gps";
 					   
-					   txtSteps.setText("(Aprox. " + steps + " steps)");
+						   txtSteps.setText("(Aprox. " + steps + " steps)");
 				       
-				       //convert meters to km per hours and round the value
-				       float roundedSpeed= (float)Math.round(speed * 36) / 10;
-				       txtCurrentSpeed.setText("" + roundedSpeed);
+						   //convert meters to km per hours and round the value
+						   float roundedSpeed= (float)Math.round(speed * 36) / 10;
+						   txtCurrentSpeed.setText("" + roundedSpeed);
 				       
-				       txtDistance.setText(""+ Math.round(distance) +" m");
+						   txtDistance.setText(""+ Math.round(distance) +" m");
 				       
-				       txtProvider.setText("Provider: " + settingsProvider); 
+						   txtProvider.setText("Provider: " + settingsProvider); 
+						   
 				        
 				   }else
 				   {
-					   txtProvider.setText("Please turn GPS on, or turn wifi on and allow it in settings."); 
+					   txtProvider.setText("Please turn GPS on, or turn WIFI on and allow it in settings."); 
 				   }
-   				          			     
-			       myHandler.postDelayed(this, 250);
+    			     
+				   
+				   myHandler.postDelayed(this, 250);
 			    }
 		};
 
@@ -279,15 +337,41 @@ public class BasicrunActivity extends Activity {
 	            distance = intent.getFloatExtra("DxDistance", 0);
 	            provider = intent.getStringExtra("DxProvider").toUpperCase(new Locale("cs", "CZ"));
 	            
-	            if(latitude!=0.0 || longtitude!=0.0){
+	            if((latitude!=0.0 || longtitude!=0.0) && doOnce){
+	            	
 	            	pBar.setVisibility(View.INVISIBLE);
 	            	chckLocated.setVisibility(View.VISIBLE);
 	            	chckLocated.setChecked(true);
+	            	
+	            	int mills = ((hours*60) + minutes)*60*1000;
+					
+					new CountDownTimer(mills, 1000) {
+
+					     public void onTick(long millisUntilFinished) {
+								
+					    	int seconds = (int) (millisUntilFinished / 1000) % 60 ;
+					    	int minutes = (int) ((millisUntilFinished / (1000*60)) % 60);
+					    	int hours   = (int) ((millisUntilFinished / (1000*60*60)) % 24);
+					    	
+					    	 String time = String.format("%dh,%dm,%ds", 
+					    			 hours,
+					    			 minutes,	
+					    			 seconds						    		    
+						    		);
+					    	 
+							txtTime.setText(time);
+					     }
+
+					     public void onFinish() {
+					    	 stopRService();
+					    	 myHandler.removeCallbacks(stepsUpdate);
+					    	 txtTime.setText("You have finished your running.");
+					    	 Toast.makeText(getApplicationContext(), "You have finished your running.", Toast.LENGTH_SHORT).show();
+					     }
+					  }.start();
+					  
+					  doOnce = false;
 	            }	            	
-	            else{
-	            	chckLocated.setVisibility(View.INVISIBLE);
-	            	pBar.setVisibility(View.VISIBLE);
-	            }
 	            	
 	        }
 		}

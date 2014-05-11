@@ -1,10 +1,10 @@
 /***********************************************************************************************************************
  *
- * This file is part of the ${PROJECT_NAME} project
+ * This file is part of the RunStat project
 
  * ==========================================
  *
- * Copyright (C) ${YEAR} by University of West Bohemia (http://www.zcu.cz/en/)
+ * Copyright (C) 2014 by University of West Bohemia (http://www.zcu.cz/en/)
  *
  ***********************************************************************************************************************
  *
@@ -19,7 +19,7 @@
  *
  ***********************************************************************************************************************
  *
- * ${NAME}, ${YEAR}/${MONTH}/${DAY} ${HOUR}:${MINUTE} ${USER}
+ * Dream team, 2014/5/11  Tomáš Bouda
  *
  **********************************************************************************************************************/
 
@@ -178,12 +178,25 @@ public class HistoryActivity extends Activity {
 			
 			LocationItem locItem = locationList.get(arg0);
 
-			locationName.setText(locItem.timeDate);
-			locationDesc.setText("run_id: "+locItem.runID);
+			locationName.setText(locItem.locationDescription + " - " + locItem.date);
+			
+			switch(locItem.runType){
+				case 0:
+					locationDesc.setText("Type: Basic");
+					break;
+				case 1:
+					locationDesc.setText("Type: Distance");
+					break;
+				case 2:
+					locationDesc.setText("Type: Time");
+					break;
+			}
+			
+			
 			locationDistance.setText("Distance: "+locItem.distance+" m");
 			locationAvgSpeed.setText("Average speed: "+locItem.avgSpeed+" km/h");
 			locationMaxSpeed.setText("Max. speed: "+locItem.speed+" km/h");
-			locationDuration.setText(" "+locItem.locationDescription);
+			locationDuration.setText("Date: "+locItem.timeDate);
 			
 			if(locItem.synchronyzed){
 				synced.setVisibility(View.VISIBLE);

@@ -1,10 +1,10 @@
 /***********************************************************************************************************************
  *
- * This file is part of the ${PROJECT_NAME} project
+ * This file is part of the RunStat project
 
  * ==========================================
  *
- * Copyright (C) ${YEAR} by University of West Bohemia (http://www.zcu.cz/en/)
+ * Copyright (C) 2014 by University of West Bohemia (http://www.zcu.cz/en/)
  *
  ***********************************************************************************************************************
  *
@@ -19,13 +19,11 @@
  *
  ***********************************************************************************************************************
  *
- * ${NAME}, ${YEAR}/${MONTH}/${DAY} ${HOUR}:${MINUTE} ${USER}
+ * Dream team, 2014/5/11  Tomáš Bouda
  *
  **********************************************************************************************************************/
 
 package cz.zcu.kiv.runstat.ui;
-
-import java.util.List;
 
 import cz.zcu.kiv.runstat.R;
 import cz.zcu.kiv.runstat.db.*;
@@ -42,7 +40,7 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.Button;
-import android.widget.Toast;
+import android.widget.ProgressBar;
 
 
 public class MainActivity extends Activity{
@@ -60,10 +58,14 @@ public class MainActivity extends Activity{
 		Log.d(TAG, "onCreate()");
 		
 		db = new DBHelper(getApplicationContext());
+		
+		//final ProgressBar pBarWait = (ProgressBar) findViewById(R.id.pBarWait);
+		
 		/*
 		 * Buttons
 		 */
 		
+		//Show context menu with running types
 		final Button btnStart = (Button) findViewById(R.id.btnStart);
 		btnStart.setOnClickListener(new OnClickListener() {
 				@Override
@@ -76,6 +78,7 @@ public class MainActivity extends Activity{
 				}
 		});
 		
+		//Show history
 		final Button btnHistory = (Button) findViewById(R.id.btnHistory);
 		btnHistory.setOnClickListener(new OnClickListener() {
 				@Override
@@ -83,58 +86,25 @@ public class MainActivity extends Activity{
 					Log.i(TAG, "History");
 
 					Intent intent = new Intent(MainActivity.this, HistoryActivity.class); 
-					startActivityForResult(intent, 0);
-										
+					startActivityForResult(intent, 0);				
 				}
 		});
 		
+		//Show basic UI for sync locaitons with server
 		final Button button1 = (Button) findViewById(R.id.btnSync);
 		button1.setOnClickListener(new OnClickListener() {
 				@Override
 				public void onClick(View v) {
 					Log.i(TAG, "DBSync");
 
-					//Intent intent = new Intent(MainActivity.this, DbSync.class); 
-					//startActivityForResult(intent, 0);
-						
-					
-					List<String> locations = db.getAllLocations();
-					for(int i=0;i<locations.size();i++){
-						Log.v("Main", locations.get(i));
-					}
+					Intent intent = new Intent(MainActivity.this, DbSync.class); 
+					startActivityForResult(intent, 0);
 				}
 		});
 		
 	}
 	
-	@Override
-	public void onCreateContextMenu(ContextMenu menu, View v,
-	                                ContextMenuInfo menuInfo) {
-	    super.onCreateContextMenu(menu, v, menuInfo);
-	    MenuInflater inflater = getMenuInflater();
-	    inflater.inflate(R.menu.context_menu, menu);
-	}
-	
-	@Override
-	public boolean onContextItemSelected(MenuItem item) {
-	    AdapterContextMenuInfo info = (AdapterContextMenuInfo) item.getMenuInfo();
-	    switch (item.getItemId()) {
-	        case R.id.basic:
-	        	Intent intent = new Intent(MainActivity.this, BasicrunActivity.class); 
-				startActivityForResult(intent, 0);
-	            return true;
-	        case R.id.distance:
-	        	//
-	            return true;
-	        case R.id.time:
-	        	//
-	            return true;
-	        default:
-	            return super.onContextItemSelected(item);
-	    }
-	}
-	
-	
+
 	@Override
 	public void onDestroy(){
 		super.onDestroy();
@@ -167,4 +137,37 @@ public class MainActivity extends Activity{
 	    }
 	}
 	
+	
+	/*
+	 * Context menu
+	 */
+	
+	@Override
+	public void onCreateContextMenu(ContextMenu menu, View v,
+	                                ContextMenuInfo menuInfo) {
+	    super.onCreateContextMenu(menu, v, menuInfo);
+	    MenuInflater inflater = getMenuInflater();
+	    inflater.inflate(R.menu.context_menu, menu);
+	}
+	
+	@Override
+	public boolean onContextItemSelected(MenuItem item) {
+	    AdapterContextMenuInfo info = (AdapterContextMenuInfo) item.getMenuInfo();
+	    switch (item.getItemId()) {
+	        case R.id.basic:
+	        	Intent intent = new Intent(MainActivity.this, BasicrunActivity.class); 
+				startActivityForResult(intent, 0);
+	            return true;
+	        case R.id.distance:
+	        	Intent intent2 = new Intent(MainActivity.this, DistancerunActivity.class); 
+				startActivityForResult(intent2, 0);
+	            return true;
+	        case R.id.time:
+	        	Intent intent3 = new Intent(MainActivity.this, TimerunActivity.class); 
+				startActivityForResult(intent3, 0);
+	            return true;
+	        default:
+	            return super.onContextItemSelected(item);
+	    }
+	}
 }

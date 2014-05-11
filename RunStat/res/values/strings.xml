@@ -8,7 +8,7 @@
     <string name="strLocationLabel">Location:</string>
     <string name="strShowLocation">Show on map</string>
     <string name="strStepsLabel">Steps:</string>
-    <string name="strSteps">0</string>
+    <string name="strSteps"> </string>
     <string name="strLogLabel">Log:</string>
     <string name="action_help">Help</string>
     <string name="service_name">RunningService</string>
@@ -38,5 +38,10 @@
 	<string name="menu_distance">Distance running</string>
 	<string name="menu_time">Time running</string>
 	<string name="menu_title">Select type</string>
+	<string name="strDistanceRunning">DISTANCE RUNNING</string>
+	<string name="strDistanceGoal">0/1000m</string>
+	<string name="strDistanceSet">Please set distance (m)</string>
+	<string name="strBtnSetDistance">OK</string>
+	<string name="strSetTime">Please set time</string>
 	
 </resources>

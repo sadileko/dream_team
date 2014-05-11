@@ -1,10 +1,10 @@
 /***********************************************************************************************************************
  *
- * This file is part of the ${PROJECT_NAME} project
+ * This file is part of the RunStat project
 
  * ==========================================
  *
- * Copyright (C) ${YEAR} by University of West Bohemia (http://www.zcu.cz/en/)
+ * Copyright (C) 2014 by University of West Bohemia (http://www.zcu.cz/en/)
  *
  ***********************************************************************************************************************
  *
@@ -19,11 +19,12 @@
  *
  ***********************************************************************************************************************
  *
- * ${NAME}, ${YEAR}/${MONTH}/${DAY} ${HOUR}:${MINUTE} ${USER}
+ * Dream team, 2014/5/11  Tomáš Bouda
  *
  **********************************************************************************************************************/
 
 package cz.zcu.kiv.runstat.db;
+
 
 import java.io.BufferedReader;
 import java.io.InputStream;
@@ -101,6 +102,9 @@ public class DbSync extends Activity {
         
     }
     
+    /*
+     * Check if internet connection is available
+     */
     public boolean isOnline() {
         ConnectivityManager cm =
             (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
@@ -111,6 +115,9 @@ public class DbSync extends Activity {
         return false;
     }
     
+/*
+ * AsyncTask for uploading locations
+ */
 private class postOperation extends AsyncTask<String, Void, String> {
 
     	private final String TAG = this.getClass().getSimpleName();

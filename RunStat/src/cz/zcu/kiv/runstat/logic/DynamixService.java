@@ -1,10 +1,10 @@
 /***********************************************************************************************************************
  *
- * This file is part of the ${PROJECT_NAME} project
+ * This file is part of the RunStat project
 
  * ==========================================
  *
- * Copyright (C) ${YEAR} by University of West Bohemia (http://www.zcu.cz/en/)
+ * Copyright (C) 2014 by University of West Bohemia (http://www.zcu.cz/en/)
  *
  ***********************************************************************************************************************
  *
@@ -19,7 +19,7 @@
  *
  ***********************************************************************************************************************
  *
- * ${NAME}, ${YEAR}/${MONTH}/${DAY} ${HOUR}:${MINUTE} ${USER}
+ * Dream team, 2014/5/11  Tomáš Bouda
  *
  **********************************************************************************************************************/
 
@@ -69,6 +69,7 @@ public class DynamixService extends Service{
 	
 	SharedPreferences sharedPref;
 	private boolean settingUseWifiProvider;
+	
 	
 	@Override
 	public IBinder onBind(Intent arg0)
@@ -120,7 +121,9 @@ public class DynamixService extends Service{
 			unbindService(dx.sConnection);
 			dx.dynamix = null;
 			dx = null;
-		
+			firstCall = true;
+			isFirstLocation = true;
+			
 		} catch (RemoteException e) {
 			e.printStackTrace();
 		}
@@ -233,7 +236,7 @@ public class DynamixPlugin {
 	    	 
 	    	 
 				//Save location to DB	    	 
-				db.addToDatabase(Double.toString(latitude), Double.toString(longtitude), runType, steps, Float.toString(speed), Float.toString(distance), firstCall);
+				db.addToDatabase(latitude, longtitude, runType, steps, speed, distance, firstCall);
 	    		 
 				//Send data to UI
 				broadcast();

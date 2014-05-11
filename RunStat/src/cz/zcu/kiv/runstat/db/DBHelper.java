@@ -1,10 +1,10 @@
 /***********************************************************************************************************************
  *
- * This file is part of the ${PROJECT_NAME} project
+ * This file is part of the RunStat project
 
  * ==========================================
  *
- * Copyright (C) ${YEAR} by University of West Bohemia (http://www.zcu.cz/en/)
+ * Copyright (C) 2014 by University of West Bohemia (http://www.zcu.cz/en/)
  *
  ***********************************************************************************************************************
  *
@@ -19,7 +19,7 @@
  *
  ***********************************************************************************************************************
  *
- * ${NAME}, ${YEAR}/${MONTH}/${DAY} ${HOUR}:${MINUTE} ${USER}
+ * Dream team, 2014/5/11  Tomáš Bouda
  *
  **********************************************************************************************************************/
 
@@ -56,9 +56,9 @@ public class DBHelper extends SQLiteOpenHelper {
 	public static final String STEPS = "steps";
 	public static final String SPEED = "speed";
 	public static final String DISTANCE = "distance";
-	public static final String TYPE = "type";			//Typ bìhu, 0 - zakladni, 1 - distancni, 2 - casovy
-	public static final String RUN_ID = "run_id";	//Id bìhu
-	public static final String SYNC = "sync";		//záznam pro rozpoznání zda je bìh na serveru	
+	public static final String TYPE = "type";			//Runtype, 0 - basic, 1 - distance, 2 - time
+	public static final String RUN_ID = "run_id";	//Id of running
+	public static final String SYNC = "sync";		//marks if the record is on server
 	
 	/*
 	 * Columns position
@@ -108,7 +108,7 @@ public class DBHelper extends SQLiteOpenHelper {
 	/*
 	 * Add location to DB
 	 */
-	public void addToDatabase(String lat, String lng, int type, int steps, String speed, String distance, boolean firstCall) {
+	public void addToDatabase(double lat, double lng, int type, int steps, float speed, float distance, boolean firstCall) {
 		SQLiteDatabase db = this.getWritableDatabase();
 		ContentValues values = new ContentValues();
 				
@@ -201,6 +201,7 @@ public class DBHelper extends SQLiteOpenHelper {
 	        if (cursor.moveToFirst()) {
 	            do {
 	            	locationsList.add( new LocationItem(
+	            			ctx,
 	            			cursor.getInt(0),
 	            			cursor.getLong(1),
 	            			cursor.getInt(2),
@@ -257,11 +258,13 @@ public class DBHelper extends SQLiteOpenHelper {
         return locationsList;
 	}
 	
-	
-	public void markAsSynchronized(long run_id){
+	/*
+	 * Mark location in DB as synchronized
+	 */
+	public void markAsSynchronized(long id){
 		SQLiteDatabase db = this.getWritableDatabase();
 		
-		String updateQuery = "UPDATE "+TABLE+" SET sync='1' WHERE sync='0' AND _id='"+run_id+"'";
+		String updateQuery = "UPDATE "+TABLE+" SET sync='1' WHERE sync='0' AND _id='"+id+"'";
         db.execSQL(updateQuery);
         
         db.close();

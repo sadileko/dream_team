@@ -1,10 +1,10 @@
 /***********************************************************************************************************************
  *
- * This file is part of the ${PROJECT_NAME} project
+ * This file is part of the RunStat project
 
  * ==========================================
  *
- * Copyright (C) ${YEAR} by University of West Bohemia (http://www.zcu.cz/en/)
+ * Copyright (C) 2014 by University of West Bohemia (http://www.zcu.cz/en/)
  *
  ***********************************************************************************************************************
  *
@@ -19,15 +19,25 @@
  *
  ***********************************************************************************************************************
  *
- * ${NAME}, ${YEAR}/${MONTH}/${DAY} ${HOUR}:${MINUTE} ${USER}
+ * Dream team, 2014/5/11  Tomáš Bouda
  *
  **********************************************************************************************************************/
 
 package cz.zcu.kiv.runstat.logic;
 
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
+
+import android.content.Context;
+import android.location.Address;
+import android.location.Geocoder;
+import android.location.Location;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
+import android.util.Log;
 
 
 public class LocationItem {
@@ -46,28 +56,30 @@ public class LocationItem {
 		public double lat;
 		public double lng;
 		public boolean synchronyzed;
-		
-		
+		public String date;
+				
 		/*
 		 * Constructor for HistoryActivity
 		 */
-		public LocationItem(int synced, long runID, int run_type, long startTime, long endTime, int steps, float avgSpeed, float maxSpeed, float distance, double lat, double lng){		
+		public LocationItem(Context ctx, int synced, long runID, int run_type, long startTime, long endTime, int steps, float avgSpeed, float maxSpeed, float distance, double lat, double lng){		
 			
 			this.runID = runID;
 			this.runType = run_type;
-			this.locationDescription = ""; //unimplemented
 			this.timeDate = convertToDateFormat(startTime);
+			this.date = convertToDate(startTime);
 			this.steps = steps;
 			this.speed = Math.round(maxSpeed * 3.6);
 			this.avgSpeed = Math.round(avgSpeed * 3.6);
 			this.distance = Math.round(distance);			
 			this.lat = lat;
 			this.lng = lng;	
+
+			this.locationDescription = getAddress(lat, lng, ctx);
 			
 			if(synced == 1)
 				this.synchronyzed = true; 
 			else
-				this.synchronyzed = false;
+				this.synchronyzed = false;			
 		}
 		
 		
@@ -124,4 +136,73 @@ public class LocationItem {
 			return time;
 		}
 		
+		private String convertToDate(long timeInMills){
+			Locale locale = new Locale("cs", "CZ");
+			
+			SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yy", locale);
+			
+			Date resultdate = new Date(timeInMills);
+			String time = ((sdf.format(resultdate)).toString());
+			
+			return time;
+		}
+
+		
+		public String getAddress(double lat, double lng, Context ctx){
+			
+			if(isOnline(ctx)){
+    	    	Geocoder geocoder = new Geocoder(ctx, Locale.getDefault());
+    	        // Get the current location from the input parameter list
+    	        Location loc = new Location("");
+    	        loc.setLatitude(lat);
+    	        loc.setLongitude(lng);
+    	        // Create a list to contain the result address
+    	        List<Address> addresses = null;
+    	        try {
+    	            /*
+    	             * Return 1 address.
+    	             */
+    	            addresses = geocoder.getFromLocation(loc.getLatitude(),loc.getLongitude(), 1);
+    	        } catch (IOException e1) {
+    	        	
+    	        Log.e("LocationSampleActivity","IO Exception in getFromLocation()");
+    	        e1.printStackTrace();
+    	        } catch (IllegalArgumentException e2) {
+    	        // Error message to post in the log
+    	        	
+    	        String errorString = "Illegal arguments " + Double.toString(loc.getLatitude()) +" , " +
+    	                Double.toString(loc.getLongitude()) + " passed to address service";
+    	        
+    	        Log.e("LocationSampleActivity", errorString);
+    	        e2.printStackTrace();
+    	        }
+    	        // If the reverse geocode returned an address
+    	        if (addresses != null && addresses.size() > 0) {
+    	            // Get the first address
+    	            Address address = addresses.get(0);
+    
+    	            return address.getSubAdminArea();
+    	        } else {
+    	        	return "...";
+    	        }
+			}
+			else
+			{
+				return "...";
+			}
+		}
+	
+		/*
+	     * Check if Internet connection is available
+	     */
+		public boolean isOnline(Context ctx) {
+		    ConnectivityManager cm =(ConnectivityManager)ctx.getSystemService(Context.CONNECTIVITY_SERVICE);
+		    NetworkInfo netInfo = cm.getActiveNetworkInfo();
+		    if (netInfo != null && netInfo.isConnectedOrConnecting()) {
+		        return true;
+		    }
+		    return false;
+		}
 }
+
+

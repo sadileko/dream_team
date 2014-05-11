@@ -47,4 +47,13 @@
         android:layout_marginBottom="17dp"
         android:src="@drawable/run" />
 
+    <ProgressBar
+        android:id="@+id/pBarWait"
+        style="?android:attr/progressBarStyleLarge"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignTop="@+id/imageView1"
+        android:layout_centerHorizontal="true"
+        android:visibility="invisible" />
+
 </RelativeLayout>
