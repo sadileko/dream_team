@@ -144,7 +144,8 @@ private class postOperation extends AsyncTask<String, Void, String> {
         					locations.get(i).distance,
         					locations.get(i).lat,
         					locations.get(i).lng,
-        					locations.get(i).time
+        					locations.get(i).time,
+        					locations.get(i).nick
         					);
         			
         			//Mark locations with specific id as synchronized
@@ -181,7 +182,7 @@ private class postOperation extends AsyncTask<String, Void, String> {
         /*
          * Insert location to server over POST request
          */
-        public void insert(long run_id, int run_type, String date, int steps, float speed, float distance, double lat, double lng, long time)
+        public void insert(long run_id, int run_type, String date, int steps, float speed, float distance, double lat, double lng, long time, String nick)
         {
         	ArrayList<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>();
      
@@ -203,6 +204,7 @@ private class postOperation extends AsyncTask<String, Void, String> {
         	nameValuePairs.add(new BasicNameValuePair("lat", strLat));
         	nameValuePairs.add(new BasicNameValuePair("lng", strLng));
         	nameValuePairs.add(new BasicNameValuePair("time", strTime));
+        	nameValuePairs.add(new BasicNameValuePair("nick", nick));
 
         	try
         	{

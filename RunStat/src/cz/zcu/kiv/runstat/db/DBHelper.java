@@ -32,9 +32,11 @@ import java.util.List;
 import cz.zcu.kiv.runstat.logic.LocationItem;
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.preference.PreferenceManager;
 import android.provider.BaseColumns;
 import android.util.Log;
 
@@ -60,6 +62,7 @@ public class DBHelper extends SQLiteOpenHelper {
 	public static final String RUN_ID = "run_id";	//Id of running
 	public static final String SYNC = "sync";		//marks if the record is on server
 	public static final String TIME = "time";
+	public static final String NICK = "nick";
 	
 	/*
 	 * Columns position
@@ -75,9 +78,11 @@ public class DBHelper extends SQLiteOpenHelper {
 	private final int _LAT = 		8;
 	private final int _LNG = 		9;
 	private final int _TIME=		10;
+	private final int _NICK =		11;
 	
 	private long lastRowID = 1;
 	private Context ctx;
+	SharedPreferences sharedPref;
 	
 	private long startTime = 0;
 	
@@ -93,7 +98,7 @@ public class DBHelper extends SQLiteOpenHelper {
 		
 		String sql = "create table " + TABLE + "( " + BaseColumns._ID
 				+ " integer primary key autoincrement, " + RUN_ID + " integer," + TYPE + " integer,"+ SYNC + " integer," + DATE + " integer, "
-				+ STEPS + " integer, "+ SPEED +" real,"+ DISTANCE+ " real," + LATITUDE + " real, " + LONGITUDE + " real,"+ TIME + " integer);";
+				+ STEPS + " integer, "+ SPEED +" real,"+ DISTANCE+ " real," + LATITUDE + " real, " + LONGITUDE + " real,"+ TIME + " integer," +NICK+ " text);";
 		
 		db.execSQL(sql);
 		Log.i(TAG, "Created DB: "+sql);
@@ -130,12 +135,15 @@ public class DBHelper extends SQLiteOpenHelper {
 		values.put(DISTANCE, distance);
 		values.put(LATITUDE, lat);
 		values.put(LONGITUDE, lng);
-		
+	
 		if(firstCall)
 			values.put(TIME, 0);
 		else
 			values.put(TIME, System.currentTimeMillis()-startTime);
 		
+		sharedPref = PreferenceManager.getDefaultSharedPreferences(ctx);
+		
+		values.put(NICK, sharedPref.getString("nick", ""));
 		
 		db.insert(TABLE, null, values);
 		
@@ -259,7 +267,8 @@ public class DBHelper extends SQLiteOpenHelper {
             			cursor.getFloat(_DISTANCE),
             			cursor.getDouble(_LAT),
             			cursor.getDouble(_LNG),
-            			cursor.getLong(_TIME)
+            			cursor.getLong(_TIME),
+            			cursor.getString(_NICK)
             			));
             	
             } while (cursor.moveToNext());
@@ -299,7 +308,7 @@ public class DBHelper extends SQLiteOpenHelper {
             do {
             	String location = "";
             	
-            	for(int i=0;i<11;i++)
+            	for(int i=0;i<12;i++)
             		location += cursor.getString(i)+"|";
 
             	locationList.add(location);

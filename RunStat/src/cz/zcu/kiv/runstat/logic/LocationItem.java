@@ -57,6 +57,7 @@ public class LocationItem {
 		public double lng;
 		public boolean synchronyzed;
 		public String date;
+		public String nick;
 				
 		/*
 		 * Constructor for HistoryActivity
@@ -87,7 +88,7 @@ public class LocationItem {
 		/*
 		 * Constructor for DbSync
 		 */
-		public LocationItem(long id, long run_id, int run_type, long date, int steps, float speed, float distance, double lat, double lng, long time){
+		public LocationItem(long id, long run_id, int run_type, long date, int steps, float speed, float distance, double lat, double lng, long time, String nick){
 			this.id = id;
 			this.runID = run_id;
 			this.runType = run_type;
@@ -98,6 +99,7 @@ public class LocationItem {
 			this.lat = lat;
 			this.lng = lng;	
 			this.timeDate = convertToDateFormatDB(date);
+			this.nick = nick;
 		}
 		
 		/*
