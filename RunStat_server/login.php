@@ -66,17 +66,17 @@ header("location:?q=home");
 		<div class="span12">
 			<form class="form-horizontal" action="<?php $_SERVER['PHP_SELF'] ?>" method="POST" class="form-signin" id = "login_form">
 			  <fieldset>
-			    <h3>Přihlásit</h3>
+			    <h3>Login</h3>
 			    <div class="control-group">
 			      <!-- Username -->
-			      <label class="control-label"  for="username">Login</label>
+			      <label class="control-label"  for="username">Username</label>
 			      <div class="controls">
 			        <input type="text" id="username" name="username" placeholder="Username" class="form-control">
 			      </div>
 			    </div>
 			    <div class="control-group">
 			      <!-- Password-->
-			      <label class="control-label" for="password">Heslo</label>
+			      <label class="control-label" for="password">Password</label>
 			      <div class="controls">
 			        <input type="password" id="password" name="password" placeholder="Password" class="form-control">
 			      </div>
@@ -85,7 +85,7 @@ header("location:?q=home");
 			      <!-- Button -->
 			      <div class="controls">
             <br>
-			        <button class="btn btn-success">Přihlásit</button> <a style='margin-left:20px' href="?q=signup">Registrace</a> 
+			        <button class="btn btn-success">Login</button> <a style='margin-left:20px' href="?q=signup">Register</a> 
 			      </div>
 			    </div>
           
@@ -102,7 +102,7 @@ header("location:?q=home");
 
 <div class="alert alert-warning">
   
-  <span style="color:black;">Pro testování využíváme login <strong>admin</strong> heslo <strong>admin</strong> </span>
+  <span style="color:black;">RunStat is a simple application used for "recording" running or walking. During the running provides current speed, distance and user location. It provides also history of user runnings, where is stored location, date, duration, max. and average speed, distance. Saved runnings can be also drawed on a map. Additionally these saved runnings can be synchronized with server, where user can see additional data, such is graphs and maps. </span>
 </div>
 
 

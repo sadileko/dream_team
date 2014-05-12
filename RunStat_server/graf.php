@@ -103,7 +103,7 @@
         var options = {
           title: '',
           //curveType: 'function',
-          //legend: { position: 'bottom' },
+          legend: { position: 'bottom' },
           chartArea:{width:"90%",height:"75%"}
           
         };
@@ -169,9 +169,18 @@
   $seconds = $input % 60;
   $input = floor($input / 60);
 
+  if ($seconds<10) $seconds = "0".$seconds;
+
   $minutes = $input % 60;
   $input = floor($input / 60);
+  
+  if ($minutes<10) $minutes = "0".$minutes;
+  
+  $hours = $input % 24;
+  $input = floor($input / 24); 
+  
+  if ($hours<10) $hours = "0".$hours;
 
-  return $minutes.":".$seconds;
+  return $hours.":".$minutes.":".$seconds;
  }
 ?>

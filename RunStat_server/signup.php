@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 
 /***********************************************************************************************************************
 *
@@ -42,36 +42,36 @@ $num_rows = mysql_num_rows($qry);
 if($num_rows > 0){
 // Here we are checking if username is already exist or not.
 
-echo "Uživatelské jméno již existuje.";
-echo '<a href="index.php?q=signup">Registrovat znovu</a>';
+echo "This username already exist.";
+echo '<a href="index.php?q=signup">Register again</a>';
 exit;
 }
 
 // Now inserting record in database.
 $query = "INSERT INTO users (firstname,organization,username,password,email,is_active,role) VALUES ('".$first_name."','".$organization."','".$username."','".$password."','".$mail."','1','1');";
 mysql_query($query);
-echo "Děkujeme za registraci.";
-echo '<a href="index.php?q=login">Klikněte zde</a> pro přihlášení.';
+echo "Thank you for register.";
+echo '<a href="index.php?q=login">Click here</a> to login.';
 exit;
 }
 
 ?>
 
 <form action="<?php $_SERVER['PHP_SELF']?>" method="post" class="form-horizontal">
-<h3>Registrace</h3>
+<h3>Register</h3>
  <table>
     <tr>
-      <td><label class="col-sm-2 control-label">Jméno</label></td> 
+      <td><label class="col-sm-2 control-label">Name</label></td> 
       <td><div class="col-sm-10"> <input type="text" class="form-control" name="firstname" size="20" placeholder="First name"></div></td>
     </tr>
 		 
     <tr>
-      <td><label class="col-sm-2 control-label">Nick</label></td>
+      <td><label class="col-sm-2 control-label">Username</label></td>
       <td><div class="col-sm-10"> <input type="text" class="form-control" name="username" size="20" placeholder="User name"></div></td>
     </tr>
              
     <tr>
-      <td><label class="col-sm-2 control-label">Heslo</label></td>
+      <td><label class="col-sm-2 control-label">Password</label></td>
       <td><div class="col-sm-10"><input type="password" class="form-control" name="password" size="20" placeholder="Password"></div></td>
      </tr>
      
@@ -81,12 +81,12 @@ exit;
     </tr>
     
     <tr>
-      <td><label class="col-sm-2 control-label">Organizace</label></td>
+      <td><label class="col-sm-2 control-label">Organization</label></td>
       <td><div class="col-sm-10"> <input type="text" class="form-control" name="organization" size="20" placeholder="Organization"></div></td>
     </tr>
     
 	 <tr>
-       <td><label class="col-sm-2 control-label"><input type="submit" value="Registrovat" class="btn btn-primary"></label></td>
+       <td><label class="col-sm-2 control-label"><input type="submit" value="Register" class="btn btn-primary"></label></td>
         
      </tr>
     
