@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 
 /***********************************************************************************************************************
 *
@@ -30,10 +30,11 @@
     $logged = $_SESSION['user'];
     $result = mysql_query("SELECT * FROM users WHERE username='$logged'",$link);
     $row=mysql_fetch_array($result, MYSQL_ASSOC);  
-    $role=$row['role'];
+    $role = $row['role'];
     $log_id = $row['id'];
+    $user = $row['username'];
     
-    $result = mysql_query("SELECT MAX(id), run_id, run_type, MAX(time), MIN(time), MAX(steps), AVG(speed), MAX(distance) FROM `locations` GROUP BY run_id",$link);
+    $result = mysql_query("SELECT MAX(id), run_id, run_type, MAX(time), MIN(time), MAX(steps), AVG(speed), MAX(distance) FROM `locations` WHERE nick='$user' GROUP BY run_id",$link);
     $pocet_behu = 0;
     $celkovy_cas = 0;
     $celkova_vzdalenost = 0;
@@ -56,16 +57,16 @@
 
     
 ?>
- <h3>Vyhodnocení</h3>
+ <h3>Stats</h3>
 <div class="container">
     <div class="row  custyle">
     <table class="table table-striped custab">
  
  
 
-<tr><td>Počet běhů:</td><td><?php echo $pocet_behu; ?></td></tr>
-<tr><td>Celkový čas:</td><td><?php prevodCasu($celkovy_cas); ?></td></tr>
-<tr><td>Celková vzdálenost:</td><td><?php printf('%02d m', $celkova_vzdalenost);  ?></td></tr>
+<tr><td>Total activities:</td><td><?php echo $pocet_behu; ?></td></tr>
+<tr><td>Total time:</td><td><?php prevodCasu($celkovy_cas); ?></td></tr>
+<tr><td>Total distance:</td><td><?php printf('%02d m', $celkova_vzdalenost);  ?></td></tr>
 
     </table>
     </div>

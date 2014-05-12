@@ -25,16 +25,31 @@
 **********************************************************************************************************************/
 
 
-session_start();
-include("config.php"); //including config.php in our file
-if(isset($_SESSION['user']) && !empty($_SESSION['user'])){
-	
-  echo "<div class='panel panel-default alert-primary'><div class='panel-body'><span class='glyphicon glyphicon-user'></span> <strong>". $_SESSION['user']."</strong> <a href = 'logout.php' class='btn btn-danger btn-xs'>Logout</a> </div></div>";
-?>
+	$host='localhost';
+	$uname='runstat.hostuju.cz';
+	$pwd='runstatpswd';
+	$db="runstat_hostuju_cz";
+  $table="users";
+            
+	$con = mysql_connect($host,$uname,$pwd) or die("connection failed");
+	mysql_select_db($db,$con) or die("db selection failed");
+	mysql_query("SET NAMES utf8");
+  
+  $username=$_REQUEST['nick'];
+  $password=$_REQUEST['password'];
 
-<?php	
-}else{
-	header("location:index.php?q=login");
-}
 
+	$flag['code']=0;
+  
+  $r = mysql_query("SELECT id FROM $table WHERE username='$username' AND password='$password'",$con);
+  $rows = mysql_num_rows($r);
+  
+	if($rows>0)
+	{
+		$flag['code']=1;
+	}
+  
+    
+	print(json_encode($flag));
+	mysql_close($con);
 ?>

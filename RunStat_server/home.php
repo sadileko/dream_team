@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 
 /***********************************************************************************************************************
 *
@@ -34,30 +34,31 @@
     $logged = $_SESSION['user'];
     $result = mysql_query("SELECT * FROM users WHERE username='$logged'",$link);
     $row=mysql_fetch_array($result, MYSQL_ASSOC);  
-    $role=$row['role'];
+    $role = $row['role'];
     $log_id = $row['id'];
+    $user = $row['username'];
   
 ?>
 
-<h3>Záznamy aktivit</h3>
+<h3>History</h3>
 <div class="container">
     <div class="row  custyle">
     <table class="table table-striped custab">
     <thead>
         <tr>
-            <th>ID</th><th>Název</th><th>Čas</th><th>Vzdálenost</th><th class="text-center">Akce</th>
+            <th>ID</th><th>Name</th><th>Time</th><th>Distance</th><th class="text-center">Action</th>
         </tr>
     </thead>
       
             <?php
-              $result = mysql_query("SELECT MAX(id), run_id, run_type, MAX(time), MIN(time), MAX(steps), AVG(speed), MAX(distance), lat, lng FROM `locations` GROUP BY run_id",$link);
+              $result = mysql_query("SELECT MAX(id), run_id, run_type, MAX(time), MIN(time), MAX(steps), AVG(speed), MAX(distance), lat, lng FROM `locations` WHERE nick='$user' GROUP BY run_id",$link);
               
               while($row=mysql_fetch_array($result, MYSQL_ASSOC)){ 
               
               $cas = $row['MAX(time)'];  
               $a_id=$row['run_id'];
               
-              echo "<tr><td>".$row['run_id']."</td><td><a href='index.php?q=graf&id=".$row['MAX(id)']."'><strong>".typBehu($row['run_type'])."</strong></a></td><td>"; prevodCasu($cas); echo "</td><td>"; printf('%01.0f m', $row['MAX(distance)']); echo "</td><td class='text-center'><a href='?q=home&a_del=$a_id' class='btn btn-danger btn-xs'><span class='glyphicon glyphicon-remove'></span> Odstranit</a></td></tr>"; } 
+              echo "<tr><td>".$row['run_id']."</td><td><a href='index.php?q=graf&id=".$row['MAX(id)']."'><strong>".typBehu($row['run_type'])."</strong></a></td><td>"; prevodCasu($cas); echo "</td><td>"; printf('%01.0f m', $row['MAX(distance)']); echo "</td><td class='text-center'><a href='?q=home&a_del=$a_id' class='btn btn-danger btn-xs'><span class='glyphicon glyphicon-remove'></span> Delete</a></td></tr>"; } 
             ?>
 
     </table>
@@ -67,9 +68,9 @@
 <?php
 
   function typBehu($type){
-    if ($type == 1) { return "Distanční běh";   }
-    else if ($type == 2) { return "Časový běh";  }
-    else { return "Normální běh"; }
+    if ($type == 1) { return "Distance running";   }
+    else if ($type == 2) { return "Time running";  }
+    else { return "Basic running"; }
   }
 
  function prevodCasu( $input )

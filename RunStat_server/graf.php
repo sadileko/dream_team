@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 
 /***********************************************************************************************************************
 *
@@ -35,6 +35,7 @@
     $row=mysql_fetch_array($result, MYSQL_ASSOC);  
     $role=$row['role'];
     $log_id = $row['id']; 
+    $user = $row['username'];
   
   //AUTOR
   if($role==1) { ?>
@@ -55,7 +56,7 @@
               }
               
               $i=0; 
-              $events = mysql_query("SELECT * FROM locations WHERE run_id=$run_id ORDER BY id ASC",$link); 
+              $events = mysql_query("SELECT * FROM locations WHERE run_id=$run_id AND nick='$user' ORDER BY id ASC",$link); 
               
               while($row2=mysql_fetch_array($events, MYSQL_ASSOC)){  
                  //echo $row2['x'].", ".$row2['y']." ".$row2['time']."<br>";
@@ -74,7 +75,7 @@
               
               for($j=1; $j<$i; $j++){
                                 
-                $osa_x[$j] = $d_time[$j]/1000;
+                $osa_x[$j] = millisToHours($d_time[$j]);
                 $osa_y[$j] = $speed[$j]*(36/10);
               
               }
@@ -87,7 +88,7 @@
       google.setOnLoadCallback(drawChart);
       function drawChart() {
         var data = google.visualization.arrayToDataTable([
-          ['Čas', 'Rychlost (km/h)'],
+          ['Time', 'Speed (km/h)'],
 
           <?php
             for($k=1; $k<$j; $k++){
@@ -113,18 +114,18 @@
       }
     </script> 
     
-    <h3>Vyhodnocení aktivity</h3>
-    <button type="button" class="btn btn-primary">Čas <strong><br><?php echo prevodCasu($time); ?></strong></button>
-    <button type="button" class="btn btn-success">Vzdálenost <strong><br><?php printf('%02d m', $range); ?></strong></button>
-    <button type="button" class="btn btn-info">Kroky <strong><br><?php echo $steps; ?> </strong></button>
-    <button type="button" class="btn btn-danger">Průměrná rychlost <strong><br><?php printf('%01.2f km/h', $r_prum); ?> </strong></button>
+    <h3>Activity</h3>
+    <button type="button" class="btn btn-primary">Time <strong><br><?php echo prevodCasu($time); ?></strong></button>
+    <button type="button" class="btn btn-success">Distance <strong><br><?php printf('%02d m', $range); ?></strong></button>
+    <button type="button" class="btn btn-info">Steps <strong><br><?php echo $steps; ?> </strong></button>
+    <button type="button" class="btn btn-danger">Average speed <strong><br><?php printf('%01.2f km/h', $r_prum); ?> </strong></button>
     <hr>
     
-    <h3>Graf rychlosti</h3>
+    <h3>Graph</h3>
     <div style="border:thin solid lightgrey;"><div id="chart_div" style="width: 100%; height: 250px"></div> </div>
     
-    <?php echo "<h3>Mapa <a href = 'map.php?id=$run_id' target='_blank' class='btn btn-success btn-sm'><span class='glyphicon glyphicon-zoom-in'></span> Zvětšit</a> </h3>";
-     echo "<iframe border=0 src='map.php?id=$run_id' width='100%' height='400'></iframe>";  ?>
+    <?php echo "<h3>Map <a href = 'map.php?id=$run_id&user=$user' target='_blank' class='btn btn-success btn-sm'><span class='glyphicon glyphicon-zoom-in'></span> Full screen</a> </h3>";
+     echo "<iframe border=0 src='map.php?id=$run_id&user=$user' width='100%' height='400'></iframe>";  ?>
    
 
 <?php 
@@ -157,5 +158,20 @@
 	printf('%02d:%02d:%02d ', $hours, $minutes, $seconds);
 
 	//return $hours.":".$minutes.":".$seconds;
+ }
+ 
+ function millisToHours( $input )
+ {
+
+  $uSec = $input % 1000;
+  $input = floor($input / 1000);
+
+  $seconds = $input % 60;
+  $input = floor($input / 60);
+
+  $minutes = $input % 60;
+  $input = floor($input / 60);
+
+  return $minutes.":".$seconds;
  }
 ?>

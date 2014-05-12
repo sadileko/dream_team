@@ -46,14 +46,14 @@
   $keywords="ZČU RunStat";
   $title="ZČU RunStat";
   $header="<img src='data/icon.png' /> ZČU RunStat";
-  $subtext="Aplikace pro monitoring běhu či chůze";
-  $footer="<span style='margin-right:5px;' class='glyphicon glyphicon-user'></span><span title='Ondřej Sadílek, Tomáš Bouda, Jan Janouškovec, Šárka Klímková a Patrik Kořínek'>Dream Team, 2014</span>";
-  $message="<span style='color:#0D314D;'> Zaujalo Vás to? Pokud používáte telefon s Androidem, aplikace je volně </span><a href='https://github.com/sadileko/dream_team' class='alert-link'>ke stažení</a>. ";
+  $subtext="Simple application for running or walking";
+  $footer="<span style='margin-right:5px;' class='glyphicon glyphicon-user'></span><span title='Ondřej Sadílek, Tomáš Bouda, Jan Janouškovec, Šárka Klímková & Patrik Kořínek'>Dream Team, 2014</span>";
+  $message="<span style='color:#0D314D;'> Do you like it? If you are an android user, you can download it for free. App is available on </span><a href='https://github.com/sadileko/dream_team' class='alert-link'>Github</a>. ";
    
   
   $menu="  
-  <li class='polozka'><a href='?q=home'><span class='glyphicon glyphicon-list'></span> Záznamy</a></li>
-  <li class='polozka'><a href='?q=stats'><span class='glyphicon glyphicon-stats'></span> Vyhodnocení</a></li>
+  <li class='polozka'><a href='?q=home'><span class='glyphicon glyphicon-list'></span> History</a></li>
+  <li class='polozka'><a href='?q=stats'><span class='glyphicon glyphicon-stats'></span> Stats</a></li>
    
 
          ";

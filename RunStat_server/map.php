@@ -30,8 +30,13 @@
   $id=$_GET['id'];
   }
   
+  if(isset($_GET['user'])){
+  $user=$_GET['user'];
+  }
+  
+  
   $i=0; 
-  $events = mysql_query("SELECT * FROM locations WHERE run_id=$id",$link); 
+  $events = mysql_query("SELECT * FROM locations WHERE nick='$user' AND run_id=$id ",$link); 
               
   while($row2=mysql_fetch_array($events, MYSQL_ASSOC)){  
    $lat[$i] = $row2['lat'];

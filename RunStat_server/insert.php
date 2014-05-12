@@ -43,11 +43,11 @@
 	$lat=$_REQUEST['lat'];
 	$lng=$_REQUEST['lng'];  
   $time=$_REQUEST['time']; 
-   
+  $nick=$_REQUEST['nick'];  
 
 	$flag['code']=0;
 
-	if( $r=mysql_query("INSERT INTO locations (run_id, run_type, date, steps, speed, distance, lat, lng, time) VALUES('$run_id','$run_type','$date','$steps','$speed','$distance','$lat','$lng','$time') ",$con) )
+	if( $r=mysql_query("INSERT INTO locations (run_id, run_type, date, steps, speed, distance, lat, lng, time, nick) VALUES('$run_id','$run_type','$date','$steps','$speed','$distance','$lat','$lng','$time','$nick') ",$con) )
 	{
 
 		$flag['code']=1;
