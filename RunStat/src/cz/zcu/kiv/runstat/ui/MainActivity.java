@@ -92,8 +92,16 @@ public class MainActivity extends Activity{
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_login);
 		Log.d(TAG, "onCreate()");
-		
+			
 		SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
+		
+		//already logged in
+		if( sharedPref.getBoolean("logged", false) ){
+			Intent intent = new Intent(MainActivity.this, MenuActivity.class); 
+    		startActivityForResult(intent, 0);
+		}
+		
+		
 		final EditText txtLogin = (EditText) findViewById(R.id.txtLogin);
 		final EditText txtPassword = (EditText) findViewById(R.id.txtPassword);
 		txtMessageText = (TextView) findViewById(R.id.txtMessageText);
@@ -126,6 +134,10 @@ public class MainActivity extends Activity{
 							pBarLogin.setVisibility(View.VISIBLE);
 							new loginOperation().execute("");
 						}
+						else
+						{
+							Toast.makeText(getApplicationContext(), "Internet connection is not available!", Toast.LENGTH_SHORT).show();
+						}
 							
 					}
 					else
@@ -152,7 +164,15 @@ public class MainActivity extends Activity{
 				
 	}
 	
+	/*
+	 * Hardware button back
+	 */
+	@Override
+	public void onBackPressed() {
+		//
+	}
 
+	
 	@Override
 	public void onDestroy(){
 		super.onDestroy();
@@ -212,20 +232,30 @@ public class MainActivity extends Activity{
 	        	
 	        	if(isOnline())
 	        		login(nick, password);
+	        	else
+	        		Toast.makeText(getApplicationContext(), "Internet connection is not available!", Toast.LENGTH_SHORT).show();
 	        	
 	        	return "Executed";
 	        }
 
 	        @Override
 	        protected void onPostExecute(String result) {
-	        	
+	        	SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+				SharedPreferences.Editor editor = settings.edit();				
 	        	if(code==1){
 	        		Toast.makeText(getApplicationContext(), "Succesfull", Toast.LENGTH_SHORT).show(); 
+	        		
+	        		editor.putBoolean("logged", true);
+					editor.commit();
+	        		
 	        		Intent intent = new Intent(MainActivity.this, MenuActivity.class); 
 	        		startActivityForResult(intent, 0);	
 	        	}else{
 	        		txtMessageText.setText("Incorect credentials!");
 	        		Toast.makeText(getApplicationContext(), "Incorect credentials!", Toast.LENGTH_SHORT).show(); 
+	        		
+	        		editor.putBoolean("logged", false);
+					editor.commit();
 	        	}
 	        	
 	        	pBarLogin.setVisibility(View.INVISIBLE);

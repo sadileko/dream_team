@@ -12,8 +12,8 @@
         android:id="@+id/linearLayout1"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_centerInParent="true"
         android:layout_centerHorizontal="true"
+        android:layout_centerInParent="true"
         android:orientation="vertical" >
 
         <Button
@@ -35,25 +35,33 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="42dp"
             android:text="@string/strBtnSync" />
-
     </LinearLayout>
 
-    <ImageView
-        android:id="@+id/imageView1"
-        android:layout_width="wrap_content"
+    <RelativeLayout
+        android:id="@+id/RelativeLayout1"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_above="@+id/linearLayout1"
-        android:layout_centerHorizontal="true"
-        android:layout_marginBottom="17dp"
-        android:src="@drawable/run" />
+        android:layout_alignLeft="@+id/linearLayout1"
+        android:layout_alignParentTop="true"
+        android:orientation="horizontal" >
 
-    <ProgressBar
-        android:id="@+id/pBarWait"
-        style="?android:attr/progressBarStyleLarge"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignTop="@+id/imageView1"
-        android:layout_centerHorizontal="true"
-        android:visibility="invisible" />
+        <TextView
+            android:id="@+id/txtLogedUser"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBaseline="@+id/btnLogOut"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentTop="true"
+            android:text="Loged as: " />
+
+        <Button
+            android:id="@+id/btnLogOut"
+            style="?android:attr/buttonStyleSmall"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentTop="true"
+            android:text="Log out" />
+    </RelativeLayout>
 
 </RelativeLayout>

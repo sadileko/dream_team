@@ -48,6 +48,7 @@ import android.view.View.OnClickListener;
 import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.Button;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 import android.widget.Toast;
 
 
@@ -55,6 +56,8 @@ public class MenuActivity extends Activity{
 	
 	DBHelper db;
 	SharedPreferences sharedPref;
+	private TextView txtLogedUser;
+	
 	
 	private final String TAG = this.getClass().getSimpleName();
 	
@@ -70,6 +73,10 @@ public class MenuActivity extends Activity{
 		
 		db = new DBHelper(getApplicationContext());
 		
+		SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
+		
+		txtLogedUser = (TextView) findViewById(R.id.txtLogedUser);
+		txtLogedUser.setText("Username: " + sharedPref.getString("nick", "") );
 		
 		/*
 		 * Buttons
@@ -126,6 +133,32 @@ public class MenuActivity extends Activity{
 				}
 		});
 		
+		//Log out
+		final Button btnLogOut = (Button) findViewById(R.id.btnLogOut);
+		btnLogOut.setOnClickListener(new OnClickListener() {
+				@Override
+				public void onClick(View v) {
+					Log.i(TAG, "LogOut");
+
+					SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+					SharedPreferences.Editor editor = settings.edit();
+					editor.putBoolean("logged", false);
+					editor.commit();
+					
+					Intent intent = new Intent(MenuActivity.this, MainActivity.class); 
+					startActivity(intent);				
+				}
+		});
+		
+	}
+	
+	
+	/*
+	 * Hardware button back
+	 */
+	@Override
+	public void onBackPressed() {
+		//
 	}
 	
 
