@@ -120,10 +120,17 @@ public class DBHelper extends SQLiteOpenHelper {
 	public void addToDatabase(double lat, double lng, int type, int steps, float speed, float distance, boolean firstCall) {
 		SQLiteDatabase db = this.getWritableDatabase();
 		ContentValues values = new ContentValues();
-				
+			
+		sharedPref = PreferenceManager.getDefaultSharedPreferences(ctx);
+		
 		if(firstCall){
-			lastRowID = getLastRowId() + 1;
+			lastRowID = sharedPref.getLong("run_id", 1) + 1;
 			startTime = System.currentTimeMillis();
+			
+			SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(ctx);
+			SharedPreferences.Editor editor = settings.edit();
+			editor.putLong("run_id", lastRowID);
+			editor.commit();
 		}
 		
 		values.put(RUN_ID, lastRowID);
@@ -141,7 +148,7 @@ public class DBHelper extends SQLiteOpenHelper {
 		else
 			values.put(TIME, System.currentTimeMillis()-startTime);
 		
-		sharedPref = PreferenceManager.getDefaultSharedPreferences(ctx);
+		
 		
 		values.put(NICK, sharedPref.getString("nick", ""));
 		
